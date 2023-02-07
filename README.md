@@ -26,21 +26,20 @@
 ![FM-7_SD](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/FM-7_SD_1.jpg)
 
 ## 部品
-### PC-6001_SD基板
+### FM-7_SD基板
 |番号|品名|数量|備考|
 | ------------ | ------------ | ------------ | ------------ |
-||J2、J3のいずれか(注1)|||
-|J2|Micro_SD_Card_Kit|1|秋月電子通商 AE-microSD-LLCNV (注2)|
-|J3|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注4)|
+|J1|2x25Pinコネクタ|1|秋月電子通商 PH-2x40RGなど|
+||J4、J5のいずれか(注1)|||
+|J4|Micro_SD_Card_Kit|1|秋月電子通商 AE-microSD-LLCNV (注2)|
+|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注4)|
 |U1|74LS04|1||
 |U2|74LS30|1||
-|U3|74LS32|1||
-|U4|8255|1||
-|U5|2764/28C64相当品|1||
-|U6|SRAM 62256相当品|1||
-|U7|Arduino_Pro_Mini_5V|1|(注3)|
-|C1 C2 C3 C4 C5 C6|積層セラミックコンデンサ 0.1uF|6||
-|C7|電解コンデンサ 16v100uF|1||
+|U3|8255|1||
+|U4|Arduino_Pro_Mini_5V|1|(注3)|
+|U5|74LS00|1||
+|C1 C3 C4 C6|積層セラミックコンデンサ 0.1uF|4||
+|C2|電解コンデンサ 16v100uF|1||
 
 　　　注1)J2又はJ3のどちらかを選択して取り付けてください。
 
@@ -50,28 +49,17 @@
 
 　　　注4)MicroSD Card Adapterを使う場合
 
-　　　　　J3に取り付けます。
+　　　　　J5に取り付けます。
 
-　　　　　MicroSD Card Adapterについているピンヘッダを除去してハンダ付けするのが一番確実ですが、J3の穴にMicroSD Card Adapterをぴったりと押しつけ、裏から多めにハンダを流し込むことでハンダ付けをする方法もあります。なお、この方法の時にはしっかりハンダ付けが出来たかテスターで導通を確認しておいた方が安心です。
+　　　　　MicroSD Card Adapterについているピンヘッダを除去してハンダ付けするのが一番確実ですが、J5の穴にMicroSD Card Adapterをぴったりと押しつけ、裏から多めにハンダを流し込むことでハンダ付けをする方法もあります。なお、この方法の時にはしっかりハンダ付けが出来たかテスターで導通を確認しておいた方が安心です。
 
-ハンダ付けに自信のない方はJ2の秋月電子通商　AE-microSD-LLCNVをお使いください。AE-microSD-LLCNVならパワーLED、アクセスLEDが付いています。
+ハンダ付けに自信のない方はJ4の秋月電子通商　AE-microSD-LLCNVをお使いください。AE-microSD-LLCNVならパワーLED、アクセスLEDが付いています。
 
-![MicroSD Card Adapter1](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/MicroSD%20Card%20Adapter.JPG)
+![MicroSD Card Adapter1](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/MicroSD%20Card%20Adapter.JPG)
 
-![MicroSD Card Adapter2](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/MicroSD%20Card%20Adapter2.JPG)
+![MicroSD Card Adapter2](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/MicroSD%20Card%20Adapter2.JPG)
 
-![MicroSD Card Adapter3](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/MicroSD%20Card%20Adapter3.JPG)
-
-### BASIC-ROM挿し替え用基板
-|番号|品名|数量|備考|
-| ------------ | ------------ | ------------ | ------------ |
-|S1|ジャンパー||27128はHigh(5V)、27256はLow(GND)に固定|
-|S2|ピンヘッダＬ型 1x3(3P)|1|秋月電子通商 PH-1X3RG(2)など|
-||ピンソケット(メス) 1x3(3P)又はコネクタ用ハウジング 3P + ケーブル用コネクタ|1|秋月電子通商 FH-1x3SG/RH 2226A-03 2226TGなど|
-||3Pトグルスイッチ 1回路2接点 パネル取付用|1|秋月電子通商 1MS1-T1-B1-M1-Q-Nなど|
-||配線材|約30cmx3||
-|U1|27128又は27256相当品|1|28C256は不可、29C256は可|
-|U2|基板用リードフレーム又は細ピンヘッダ|12Pinx2|秋月電子通商 SS2.54-6SN、PHA-1x40SGなど|
+![MicroSD Card Adapter3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/MicroSD%20Card%20Adapter3.JPG)
 
 ## ROMへの書込み
 　Z80フォルダ内のEXT_ROM.binをROMライター(TL866II Plus等)を使って2764又は28C64に書き込みます。
