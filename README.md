@@ -2,39 +2,28 @@
 
 ![TITLE](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE.JPG)
 
-　PC-6001でSD-CARDからロード、セーブ機能を実現するものです。
+　FM-7でSD-CARDからロード、セーブ機能を実現するものです。
 
-　対応機種は初代PC-6001です。
+　対応機種はFM-7、FM-NEW7です。(以下FM-7と記述します。)
 
-　PC-6001mk2以降の機種でも動作しますが、MODE1、MODE2のみの動作となります。また、PC-6601、PC-6601SRはドライブ数切替スイッチは0として使ってください。なお、PC-6001mk2以降の機種では裏RAMにBASIC-ROMをコピーしてパッチを当てますのでBASIC-ROMを差し替える必要はありません。
+　FM-7本体内のBOOT-ROMの差し替えが必須となります。
 
-　対応しているCMT形式は、P6T形式とCAS形式(拡張子はP6、CASのどちらでも大丈夫)です。
+　対応しているCMT形式は、FM-7がCMTで読み書きするバイナリデータ形式(拡張子BIMとしています)です。T77<->BIMはツールを使って変換が必要です。
 
 　CMTからの読み込み実行に数分掛かっていたゲームも数十秒で実行できます。
 
 　なお、Arduino、ROMへ書き込むための機器が別途必要となります。
 
-![PC-6001_SD](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/PC-6001_SD(2).JPG)
-
-![ROM_SOCKET](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_SOCKET(1).JPG)
-
 ## 対応できないもの
-　BASIC-ROMのCMT関連ルーチンにパッチを当てたROMに差し替えることでSD-CARDへのアクセスを実現していますのでBASIC-ROMのCMT関連ルーチンをコールせず独自にCMTからLOADするソフト（ロードランナー等）は対応できないので途中で止まります。
+　BIOSのCMT読み書きルーチンをフックすることでSD-CARDへのアクセスを実現していますのでBIOSをコールせず独自にCMTからLOADするソフト（ちゃっくんぽっぷ等）は対応できないので途中で止まります。
 
 ## 回路図
-### PC-6001_SD基板
-　KiCadフォルダ/PC-6001_SD内のPC-6001_SD.pdfを参照してください。
+### FM-7_SD基板
+　KiCadフォルダ内のFM-7_SD.pdfを参照してください。
 
-[回路図](https://github.com/yanataka60/PC-6001_SD/blob/main/Kicad/PC-6001_SD/PC-6001_SD.pdf)
+[回路図](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/FM-7_SD.pdf)
 
-![PC-6001_SD](https://github.com/yanataka60/PC-6001_SD/blob/main/Kicad/PC-6001_SD/PC-6001_SD.jpg)
-
-### BASIC-ROM挿し替え用基板
-　KiCadフォルダ/ROM_SOCKET内のROM_SOCKET.pdfを参照してください。
-
-[回路図](https://github.com/yanataka60/PC-6001_SD/blob/main/Kicad/ROM_SOCKET/ROM_SOCKET.pdf)
-
-![PC-6001_SD](https://github.com/yanataka60/PC-6001_SD/blob/main/Kicad/ROM_SOCKET/ROM_SOCKET.jpg)
+![FM-7_SD](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/FM-7_SD_1.jpg)
 
 ## 部品
 ### PC-6001_SD基板
