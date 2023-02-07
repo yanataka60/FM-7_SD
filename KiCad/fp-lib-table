@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name FM-7_SD)(type KiCad)(uri ${KIPRJMOD})(options "")(descr ""))
+)
