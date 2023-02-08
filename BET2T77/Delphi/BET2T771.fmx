@@ -1,0 +1,31 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'FM-7_SD'#12505#12479#12501#12449#12452#12523' to T77'
+  ClientHeight = 81
+  ClientWidth = 407
+  Position = DesktopCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object Panel1: TPanel
+    Align = Client
+    Size.Width = 407.000000000000000000
+    Size.Height = 81.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    OnDragLeave = Panel1DragLeave
+    OnDragOver = Panel1DragOver
+    object Label1: TLabel
+      Align = Client
+      DragMode = dmAutomatic
+      Size.Width = 407.000000000000000000
+      Size.Height = 81.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Center
+      Text = #12371#12371#12395#12501#12449#12452#12523#12434#12489#12521#12483#12464'&&'#12489#12525#12483#12503#12375#12390#12367#12384#12373#12356#12290
+      TabOrder = 0
+    end
+  end
+end
