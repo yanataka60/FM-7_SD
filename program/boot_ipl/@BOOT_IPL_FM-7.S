@@ -404,6 +404,6 @@ ERR_F99	FCC		/UNKNOWN ERROR/
 
 *新拡張コマンドTBL
 NEWTBL	RMB		64
-		FCC		/EN/
+		FCC		/EN/		;NEWTBL領域の終わり位置を示す
 
 		END
