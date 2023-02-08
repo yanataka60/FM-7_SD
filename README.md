@@ -32,7 +32,6 @@
 ![FM-7_SD](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/FM-7_SD_1.jpg)
 
 ## 部品
-### FM-7_SD基板
 |番号|品名|数量|備考|
 | ------------ | ------------ | ------------ | ------------ |
 |J1|2x25Pinコネクタ|1|秋月電子通商 PH-2x40RGなど|
