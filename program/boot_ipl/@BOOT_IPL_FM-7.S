@@ -122,10 +122,16 @@ SDIR_PRG
 
 		JSR		READ0		;SDIRの次に文字列があるか?
 		BNE		SDIR1		;あればSDIR1へ
+		CLRA
+		JSR		SNDBYTE		;継続指示
 		LDA		#$01
 		JSR		SNDBYTE		;なければ送信文字列数1文字として終了コード送信へ
 		BRA		SDIR3
-SDIR1	JSR		GETSTR		;文字列取得
+SDIR1	CMPA	#$22		;次の文字がダブルコーテーションでなかったらエラー
+		LBNE	ERRNAME
+		CLRA
+		JSR		SNDBYTE		;継続指示
+		JSR		GETSTR		;文字列取得
 		PSHS	B
 		PULS	A
 		INCA
@@ -206,8 +212,19 @@ DL7		LDA		#$FF
 DL8		JSR		SNDBYTE
 		BRA		DL2
 		
-		
 SDIR99	RTS
+
+ERRNAME	PSHS	A
+		LDA		#$FF
+		JSR		SNDBYTE		;打ち切り指示
+		PULS	A
+		TSTA				;$00ならポインタを進めない SETL SETSのみはERROR
+		BEQ		ERRNM2
+ERRNM1	JSR		READ1		;入力コマンド解釈ポインタ+1
+		TSTA
+		BNE		ERRNM1
+ERRNM2	LDA		#$F5		;NOT DOUBLE QUOTATION表示
+		LBRA	ERRC
 
 *「SETL」処理
 SETL_PRG
@@ -215,7 +232,12 @@ SETL_PRG
 		JSR		SNDBYTE		;Aレジスタのコマンドコードを送信
 		JSR		RCVBYTE		;状態取得(00H=OK)
 		TSTA
-		BNE		ERRC
+		LBNE	ERRC
+		JSR		READ0
+		CMPA	#$22		;次の文字がダブルコーテーションでなかったらエラー
+		BNE		ERRNAME
+		CLRA
+		JSR		SNDBYTE		;継続指示
 		JSR		GETSTR		;文字列取得
 		PSHS	B
 		PULS	A
@@ -246,6 +268,11 @@ SETS_PRG
 		JSR		RCVBYTE		;状態取得(00H=OK)
 		TSTA
 		BNE		ERRC
+		JSR		READ0
+		CMPA	#$22		;次の文字がダブルコーテーションでなかったらエラー
+		BNE		ERRNAME
+		CLRA
+		JSR		SNDBYTE		;継続指示
 		JSR		GETSTR		;文字列取得
 		PSHS	B
 		PULS	A
@@ -307,8 +334,12 @@ ERR2	CMPA	#$F2
 		LDX		#ERR_F2
 		BRA		ERRR
 ERR3	CMPA	#$F4
-		BNE		ERR99
+		BNE		ERR4
 		LDX		#ERR_F4
+		BRA		ERRR
+ERR4	CMPA	#$F5
+		BNE		ERR99
+		LDX		#ERR_F5
 		BRA		ERRR
 
 ERR99	LDX		#ERR_F99
@@ -363,6 +394,9 @@ ERR_F2	FCC		/FILE OPEN ERROR/
 		FCB		$0D,$0A,$00
 
 ERR_F4	FCC		/CMD ERROR/
+		FCB		$0D,$0A,$00
+
+ERR_F5	FCC		/NOT DOUBLE QUOTATION/
 		FCB		$0D,$0A,$00
 
 ERR_F99	FCC		/UNKNOWN ERROR/

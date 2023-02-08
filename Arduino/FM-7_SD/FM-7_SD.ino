@@ -472,21 +472,27 @@ void loop()
 ////    Serial.println("FILE LIST START");
 //状態コード送信(OK)
         snd1byte(0x00);
-        dirlist();
+        if (rcv1byte()==0x00){
+          dirlist();
+        }
         break;
 //53hでLOADFILEOPEN
       case 0x53:
 ////    Serial.println("LOADFILEOPEN");
 //状態コード送信(OK)
         snd1byte(0x00);
-        loadopen();
+        if (rcv1byte()==0x00){
+          loadopen();
+        }
         break;
 //54hでSAVEFILEOPEN
       case 0x54:
 ////    Serial.println("SAVEFILEOPEN");
 //状態コード送信(OK)
         snd1byte(0x00);
-        saveopen();
+        if (rcv1byte()==0x00){
+          saveopen();
+        }
         break;
 //56hでLOAD1BYTE
       case 0x56:
