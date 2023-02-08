@@ -72,7 +72,7 @@
 ## BOOT-ROMの差し替え
 　FM-7_SDを使うにはBOOT-ROMの差し替えが必須になります。
 
-　次の３つの運用方法によりROMの差し替え方法が変わります。
+　programフォルダ内bootromフォルダにある「FM-7_BOOTROM_SD.bin」を使いますが、次の３つの運用方法によりROMの差し替え方法が変わります。
 
 　1　FM-7_SDとCMTだけが使えればよい。(DISK-BASIC、DOS-MODEは使わない)
 
@@ -85,8 +85,6 @@
 　3　FM-7_SD、CMT、DISK-BASIC、DOS-MODEのすべてを使いたい。
 
 　　　ROM 2732の前半に元のBOOT-ROMの内容、後半($0800～$09FF、$0C00～$0DFFのいずれか)にFM-7_BOOTROM_SD.binとしたバイナリをROMライター(TL866II Plus等)を使って書き込みます。2732変換基板又は24PinICソケットの21Pinを曲げてスイッチで5VとGNDを切り替えられるようにしてBOOT-ROMのICソケットに装着します。
-
-　「FM-7_BOOTROM_SD.bin」はprogramフォルダ内bootromフォルダにあります。
 
 ### FM-7 BOOT-ROM
 ![boot-rom1](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/FM-7_BOOT-ROM_1.JPG)
