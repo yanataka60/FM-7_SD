@@ -40,6 +40,9 @@
 |U5|74LS00|1||
 |C1 C3 C4 C6|積層セラミックコンデンサ 0.1uF|4||
 |C2|電解コンデンサ 16v100uF|1||
+||ROM 2716又は2732|1|AT28C16、M2732Aなど|
+||2732変換基板又は24PinICソケット|1|2732を使った場合切り替え用|
+||3Pトグルスイッチ|1|2732を使った場合の切り替え用|
 
 　　　注1)J2又はJ3のどちらかを選択して取り付けてください。
 
@@ -61,97 +64,57 @@
 
 ![MicroSD Card Adapter3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/MicroSD%20Card%20Adapter3.JPG)
 
-## ROMへの書込み
-　Z80フォルダ内のEXT_ROM.binをROMライター(TL866II Plus等)を使って2764又は28C64に書き込みます。
+## BOOT-ROMの差し替え
+　FM-7_SDを使うにはBOOT-ROMの差し替えが必須になります。
+
+　運用方法としては次の３つによりROMの差し替え方法が変わります。
+
+　1　FM-7_SDとCMTだけが使えればよい。(DISK-BASIC、DOS-MODEは使わない)
+
+　　　元のBOOT-ROMを読み出す必要はありません。FM-7_BOOTROM_SD.binをROMライター(TL866II Plus等)を使ってROM 2716のアドレス($0000～$01FF、$0400～$05FF)に書き込んでBOOT-ROMのICソケットに装着します。
+
+　2　FM-7_SDとCMTに加えてDISK-BASICは使いたい。(DOS-MODEは使わない)
+
+　　　元のBOOT-ROMの内容の後半DOS-MODE用の領域($0400～$05FF)をFM-7_BOOTROM_SD.binに差し替えたバイナリをROMライター(TL866II Plus等)を使ってROM 2716に書き込んでBOOT-ROMのICソケットに装着します。
+
+　3　FM-7_SD、CMT、DISK-BASIC、DOS-MODEのすべてを使いたい。
+
+　　　ROM 2732の前半に元のBOOT-ROMの内容、後半($0800～$09FF、$0C00～$0DFFのいずれか)にFM-7_BOOTROM_SD.binとしたバイナリをROMライター(TL866II Plus等)を使って書き込みます。2732変換基板又は24PinICソケットの21Pinを曲げてスイッチで5VとGNDを切り替えられるようにしてBOOT-ROMのICソケットに装着します。
+
+　「FM-7_BOOTROM_SD.bin」はprogramフォルダ内bootromフォルダにあります。
+
+### FM-7 BOOT-ROM
+![boot-rom1](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/FM-7_BOOT-ROM_1.JPG)
+
+![boot-rom2](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/FM-7_BOOT-ROM_2.JPG)
+
+### FM-NEW7 BOOT-ROM
+![boot-rom3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/NEW-7_BOOT-ROM_1.JPG)
+
+![boot-rom4](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/NEW-7_BOOT-ROM_2.JPG)
+
+## SD-CARDアクセス初期設定プログラム
+　programフォルダ内boot_iplフォルダの「@BOOT_IPL_FM-7.bin」をSD-CARDにコピーしてください。
+
+　FM-7起動後に「EXEC &HFE02」を実行することでSD-CARDから「@BOOT_IPL_FM-7.bin」がテキストエリアの最初に読み込まれSD-CARDが使えるようBASICコマンドの追加、BIOSへのパッチあて、テキストエリアの再設定が行われます。
 
 ## Arduinoプログラム
-　Arduino IDEを使ってArduinoフォルダのPC-6001mk2_SDフォルダ内PC-6001mk2_SD.inoを書き込みます。
+　Arduino IDEを使ってArduinoフォルダのFM-7_SDフォルダ内FM-7_SD.inoを書き込みます。
 
 　SdFatライブラリを使用しているのでArduino IDEメニューのライブラリの管理からライブラリマネージャを立ち上げて「SdFat」をインストールしてください。
 
 　「SdFat」で検索すれば見つかります。「SdFat」と「SdFat - Adafruit Fork」が見つかりますが「SdFat」のほうを使っています。
 
-注)Arduinoを基板に直付けしている場合、Arduinoプログラムを書き込むときは、カートリッジスロットから抜き、74LS04を外したうえで書き込んでください。
+注)Arduinoを基板に直付けしていてもFM-7本体から外していれば書き込めます。
 
-## BASIC-ROMの挿し替え
-### BASIC-ROMの抽出
-　まず、PC-6001_SD基板を完成させ、拡張スロットに挿入して電源を入れます。
-
-　画面に「PC-6001_SD Launcher」と表示されるので、STOPキー又は「1」コマンド、「B」コマンドでBASICを起動します。
-
-![ROM_DUMP](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_DUMP.JPG)
-
-　入力待ちになったら「EXEC &H4013[CR]」と入力するとBASIC-ROMの内容をSD-CARDに保存するプログラムが実行されます。
-
-![ROM_DUMP1](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_DUMP(1).JPG)
-
-![ROM_DUMP2](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_DUMP(2).JPG)
-
-![ROM_DUMP3](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_DUMP(3).JPG)
-
-![ROM_DUMP4](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_DUMP(4).JPG)
-
-　終わったらSD-CARDを抜き、Windowsパソコン等で内容を確認すると「ROM60A.CAS」と「ROM60B.CAS」という二つのファイルが作成されているはずです。
-
-　「ROM60A.CAS」「ROM60B.CAS」とも拡張子を「.bin」に変更します。
-
-　「ROM60A.bin」はBASIC-ROM全体(0000h～3FFFh)のダンプファイルです。Emulator等に使ってください。
-
-　「ROM60B.bin」はBASIC-ROM前半(0000h～1FFFh)のダンプファイルでこちらにパッチを当て挿し替えることになります。
-
-### BASIC-ROMへのパッチあて
-　まず、「ROM60B.bin」をコピーし「ROM60C.bin」を作ります。
-
-　「ROM60C.bin」の以下のアドレスを修正します。
-
-|ADDRESS|修正前|修正後|
-| ------------ | ------------ | ------------ |
-|1A61|C5 D5 E5|C3 04 40|
-|1A70|C5 D5 E5|C3 07 40|
-|1AB8|C5 D5 E5|C3 0A 40|
-|1ACC|C5 D5 E5|C3 0D 40|
-|1B06|C5 D5 E5|C3 10 40|
-
-　「ROM60B.bin」と「ROM60C.bin」をマージし、「ROM60.bin」として保存します。ROM60B.binが0000h～1FFFh、ROM60C.binが2000h～3FFFhとなります。
-
-　出来上がった「ROM60.bin」を27128又は27256等に焼きます。
-
-### BASIC-ROM挿し替え用基板の装着
-
-　BASIC-ROM挿し替え用基板に27128を使うときはA14(S1)はHigh(5V)に固定します。
-
-　27256を使うときは、A14(S1)はLow(GND)にします。が、A14もA13と同様に3Pスイッチで切り替えられるようにすれば4000h～7FFFhまでを使って4つまでBASIC-ROMを切り替えられるようにも出来ます。
-
-![ROM_SOCKET1](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_SOCKET(1).JPG)
-
-![ROM_SOCKET2](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_SOCKET(2).JPG)
-
-![ROM_SOCKET3](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_SOCKET(3).JPG)
-
-　3PトグルスイッチによりCMTとSDを切り替えられるようにします。
-
-　3PトグルスイッチはRS-232C用のパネルに穴を開けて取り付けるのがいいと思います。
-
-![ROM_SOCKET4](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_SOCKET(4).JPG)
-
-![ROM_SOCKET5](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_SOCKET(5).JPG)
-
-![ROM_SOCKET6](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/ROM_SOCKET(6).JPG)
+### 電源が入ったFM-7本体とFM-7_SDを繋げたままArduinoを書き込む場合には、Arduinoに繋ぐシリアルコンバータから絶対に電源を供給しないでください。最悪FM-7本体が破壊される場合があります。
 
 ## 接続
-　カートリッジスロットに挿入します。
+　FM-7本体後ろの50Pin拡張端子から50Pinフラットケーブルで接続します。
 
-![cartridge](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/PC-6001_SD(3).JPG)
+![connect1](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/CONNECT_1.JPG)
 
-　カートリッジスロットへの抜き差しに基板のみでは不便です。
-
-　STLフォルダに基板を載せられるトレイの3Dデータを置いたので出力して使うと便利です。
-
-![Tray](https://github.com/yanataka60/PC-6001_SD/blob/main/JPEG/TRAY.JPG)
-
-　PC-6601、PC-6601SRはドライブ数切替スイッチは0として使ってください。
-
-![Drive](https://github.com/yanataka60/PC-6001mk2_SD/blob/main/JPEG/DRIVE.JPG)
+![connect2](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/CONNECT_2.JPG)
 
 ## SD-CARD
 　FAT16又はFAT32が認識できます。
