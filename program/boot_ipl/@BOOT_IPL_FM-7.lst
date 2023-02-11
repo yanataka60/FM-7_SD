@@ -1,439 +1,437 @@
-00001 0790                       ORG     $0790
-00002 0790                       
-00003      00BF         FILENO   EQU     $00BF         ;ファイル番号
-00004      00D2         READ1    EQU     $00D2         ;汎用読み込みルーチン
-00005      00D8         READ0    EQU     $00D8         ;汎用読み込みルーチン、ポインタ移動無し
-00006      00DE         BIOSV    EQU     $00DE         ;BIOSジャンプルーチン
-00007      0203         EXTNUM   EQU     $0203         ;拡張予約語の数
-00008      0204         EXTTBL   EQU     $0204         ;拡張予約語の綴りテーブルの先頭アドレス
-00009      0210         EXTTRN   EQU     $0210         ;Syntax Errorのアドレス
-00010      053F         LBUF     EQU     $053F         ;数値->文字列変換における文字列バッファ(ファイル名受信バッファとして使用)
-00011      92A0         ERRENT   EQU     $92A0         ;Syntax Errorエントリ
-00012      98F1         GETSTR   EQU     $98F1         ;文字列実効番地読み出し
-00013      C495         AZLCNV   EQU     $C495         ;英小文字->大文字変換ルーチン
-00014      D90F         LOUT1    EQU     $D90F         ;文字列出力ルーチン
-00015      DB54         INPUT1   EQU     $DB54         ;キーボード1Byte入力ルーチン
-00016      FBFA         RETADD   EQU     $FBFA         ;本来のBIOSジャンプルーチンエントリ
-00017      FE05         SNDBYTE  EQU     $FE05         ;(BOOTROM)Arduinoへ1Byte送信
-00018      FE08         RCVBYTE  EQU     $FE08         ;(BOOTROM)Arduinoから1Byte受信
-00019      FE0B         MOTOR    EQU     $FE0B         ;(BOOTROM)BIOS[01]モーター制御
-00020      FE0E         WRITE1BYTE EQU   $FE0E         ;(BOOTROM)BIOS[02]SD-CARDへ1Byte書き込み
-00021      FE11         READ1BYTE EQU    $FE11         ;(BOOTROM)BIOS[03]SD-CARDから1Byte読み込み
-00022                   *
-00023 0790              START    
-00024                   * 拡張コマンドテーブルを#NEWTBLにコピーして拡張コマンド「SDIR」「SETL」「SETS」「SDON」「CMT」を追加
-00025 0790 F60203                LDB     EXTNUM        ;B <- 拡張コマンド数
-00026 0793 7C0203                INC     EXTNUM        ;拡張コマンド数+1
-00027 0796 7C0203                INC     EXTNUM        ;拡張コマンド数+1
-00028 0799 7C0203                INC     EXTNUM        ;拡張コマンド数+1
-00029 079C 7C0203                INC     EXTNUM        ;拡張コマンド数+1
-00030 079F 7C0203                INC     EXTNUM        ;拡張コマンド数+1
-00031 07A2 BE0204                LDX     EXTTBL        ;X <- 旧拡張コマンドTBLアドレス
-00032 07A5 CE0AEF                LDU     #NEWTBL       ;U <- 新拡張コマンドTBLアドレス
-00033 07A8 FF0204                STU     EXTTBL        ;拡張コマンドTBLポインタ <- 新拡張コマンドTBLアドレス
-00034                   *
-00035 07AB A680         COPY     LDA     ,X+           ;拡張コマンドTBLをコピー
-00036 07AD A7C0                  STA     ,U+
-00037 07AF 2AFA                  BPL     COPY          ;BIT7が1になるまでループ
-00038 07B1 5A                    DECB                  ;カウンタ-1
-00039 07B2 26F7                  BNE     COPY          ;カウンタが0になるまでループ
-00040                   *
-00041 07B4 8653                  LDA     #'S           ;「SDIR」コマンドを追加
-00042 07B6 C644                  LDB     #'D
-00043 07B8 EDC1                  STD     ,U++
-00044 07BA 8649                  LDA     #'I
-00045 07BC C6D2                  LDB     #'R+$80
-00046 07BE EDC1                  STD     ,U++
-00047                   *
-00048 07C0 8653                  LDA     #'S           ;「SETL」コマンドを追加
-00049 07C2 C645                  LDB     #'E
-00050 07C4 EDC1                  STD     ,U++
-00051 07C6 8654                  LDA     #'T
-00052 07C8 C6CC                  LDB     #'L+$80
-00053 07CA EDC1                  STD     ,U++
-00054                   *
-00055 07CC 8653                  LDA     #'S           ;「SETS」コマンドを追加
-00056 07CE C645                  LDB     #'E
-00057 07D0 EDC1                  STD     ,U++
-00058 07D2 8654                  LDA     #'T
-00059 07D4 C6D3                  LDB     #'S+$80
-00060 07D6 EDC1                  STD     ,U++
-00061 07D8                       
-00062 07D8 8653                  LDA     #'S           ;「SDON」コマンドを追加
-00063 07DA C644                  LDB     #'D
-00064 07DC EDC1                  STD     ,U++
-00065 07DE 864F                  LDA     #'O
-00066 07E0 C6CE                  LDB     #'N+$80
-00067 07E2 EDC1                  STD     ,U++
-00068 07E4                       
-00069 07E4 8643                  LDA     #'C           ;「CMT」コマンドを追加
-00070 07E6 C64D                  LDB     #'M
-00071 07E8 EDC1                  STD     ,U++
-00072 07EA 86D4                  LDA     #'T+$80
-00073 07EC C600                  LDB     #$00
-00074 07EE EDC0                  STD     ,U+
-00075 07F0                       
-00076 07F0 8E0807                LDX     #NEWTRN       ;追加コマンド判定ルーチンアドレス
-00077 07F3 BF0210                STX     EXTTRN        ;拡張コマンド判定後のジャンプ先アドレスポインタを追加コマンド判定ルーチンアドレスに書き換え
-00078 07F6                       
-00079                   *BIOS CWRITE CREADフック
-00080 07F6 8E09D9       BIOSF    LDX     #BIOSR
-00081 07F9 9FDF                  STX     BIOSV+1       ;($DF) <- BIOSフック用ルーチンアドレス
-00082 07FB                       
-00083                   *SD関連書き換え終了メッセージ
-00084 07FB 0FBF                  CLR     <FILENO       ;($00BF) <- 0 画面出力へ設定
-00085 07FD 8E09F8                LDX     #MSG1
-00086 0800 BDD90F                JSR     LOUT1         ;「FM-7_SD READY OK!」を表示
-00087 0803                       
-00088 0803 39                    RTS                   ;BASICへ戻る
-00089 0804                       
-00090                   *
-00091 0804 7E92A0       ERR02    JMP     ERRENT
-00092 0807                       
-00093                   *追加コマンド判定ルーチン
-00094 0807 81F4         NEWTRN   CMPA    #$F4          ;「SDIR」判定
-00095 0809 2604                  BNE     NEWTRN2
-00096 080B 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
-00097 080D 2024                  BRA     SDIR_PRG
-00098 080F 81F5         NEWTRN2  CMPA    #$F5          ;「SETL」判定
-00099 0811 2605                  BNE     NEWTRN3
-00100 0813 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
-00101 0815 1600F7                LBRA    SETL_PRG
-00102 0818 81F6         NEWTRN3  CMPA    #$F6          ;「SETS」判定
-00103 081A 2605                  BNE     NEWTRN4
-00104 081C 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
-00105 081E 16012B                LBRA    SETS_PRG
-00106 0821 81F7         NEWTRN4  CMPA    #$F7          ;「SDON」判定
-00107 0823 2605                  BNE     NEWTRN5
-00108 0825 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
-00109 0827 16015D                LBRA    SDON_PRG
-00110 082A 81F8         NEWTRN5  CMPA    #$F8          ;「CMT」判定
-00111 082C 26D6                  BNE     ERR02         ;どれでもなければエラー
-00112 082E 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
-00113 0830 160162                LBRA    CMT_PRG
-00114                   *
-00115                   *「SDIR」処理
-00116 0833              SDIR_PRG
-00117 0833 8652                  LDA     #$52
-00118 0835 BDFE05                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
-00119 0838 BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
-00120 083B 4D                    TSTA
-00121 083C 10260163              LBNE    ERRC
-00122 0840                       
-00123 0840 9DD8                  JSR     READ0         ;SDIRの次に文字列があるか?
-00124 0842 260B                  BNE     SDIR1         ;あればSDIR1へ
-00125 0844 4F                    CLRA
-00126 0845 BDFE05                JSR     SNDBYTE       ;継続指示
-00127 0848 8601                  LDA     #$01
-00128 084A BDFE05                JSR     SNDBYTE       ;なければ送信文字列数1文字として終了コード送信へ
-00129 084D 2020                  BRA     SDIR3
-00130 084F 8122         SDIR1    CMPA    #$22          ;次の文字がダブルコーテーションでなかったらエラー
-00131 0851 102600A4              LBNE    ERRNAME
-00132 0855 4F                    CLRA
-00133 0856 BDFE05                JSR     SNDBYTE       ;継続指示
-00134 0859 BD98F1                JSR     GETSTR        ;文字列取得
-00135 085C 3404                  PSHS    B
-00136 085E 3502                  PULS    A
-00137 0860 4C                    INCA
-00138 0861 BDFE05                JSR     SNDBYTE       ;文字列数を送信
-00139 0864 A680         SDIR2    LDA     ,X+
-00140 0866 BDC495                JSR     AZLCNV        ;文字列を1文字取得して大文字に変換
-00141 0869 BDFE05                JSR     SNDBYTE       ;送信
-00142 086C 5A                    DECB
-00143 086D 26F5                  BNE     SDIR2
-00144 086F                       
-00145 086F 4F           SDIR3    CLRA
-00146 0870 BDFE05                JSR     SNDBYTE       ;文字列送信終了コード送信
-00147 0873                       
-00148 0873 BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
-00149 0876 4D                    TSTA
-00150 0877 10260128              LBNE    ERRC          ;エラー処理へ
-00151 087B                       
-00152 087B 0FBF                  CLR     <FILENO
-00153 087D 108E053F     DL1      LDY     #LBUF         ;Arduinoから送られてくる文字列を#LBUFへ格納
-00154 0881 BDFE08       DL2      JSR     RCVBYTE
-00155 0884 4D                    TSTA
-00156 0885 2710                  BEQ     DL3           ;$00を受信するまでを一行とする
-00157 0887 81FF                  CMPA    #$FF
-00158 0889 271F                  BEQ     DL4           ;$FFを受信したら終了
-00159 088B 81FD                  CMPA    #$FD
-00160 088D 271F                  BEQ     DL9           ;$FD受信で文字列を取得してSETLしたことを表示
-00161 088F 81FE                  CMPA    #$FE
-00162 0891 273A                  BEQ     DL5           ;$FEを受信したら一時停止して一文字入力待ち
-00163 0893 A7A0                  STA     ,Y+
-00164 0895 20EA                  BRA     DL2
-00165 0897                       
-00166 0897              DL3
-00167 0897 860D                  LDA     #$0D          ;$00を受信したら一行分を表示して改行
-00168 0899 A7A0                  STA     ,Y+
-00169 089B 860A                  LDA     #$0A
+00001                   ;2023.2.11 リロケータブルに修正
+00002                   ;
+00003 0790                       ORG     $0790
+00004 0790                       
+00005      00BF         FILENO   EQU     $00BF         ;ファイル番号
+00006      00D2         READ1    EQU     $00D2         ;汎用読み込みルーチン
+00007      00D8         READ0    EQU     $00D8         ;汎用読み込みルーチン、ポインタ移動無し
+00008      00DE         BIOSV    EQU     $00DE         ;BIOSジャンプルーチン
+00009      0203         EXTNUM   EQU     $0203         ;拡張予約語の数
+00010      0204         EXTTBL   EQU     $0204         ;拡張予約語の綴りテーブルの先頭アドレス
+00011      0210         EXTTRN   EQU     $0210         ;Syntax Errorのアドレス
+00012      053F         LBUF     EQU     $053F         ;数値->文字列変換における文字列バッファ(ファイル名受信バッファとして使用)
+00013      92A0         ERRENT   EQU     $92A0         ;Syntax Errorエントリ
+00014      98F1         GETSTR   EQU     $98F1         ;文字列実効番地読み出し
+00015      C495         AZLCNV   EQU     $C495         ;英小文字->大文字変換ルーチン
+00016      D90F         LOUT1    EQU     $D90F         ;文字列出力ルーチン
+00017      DB54         INPUT1   EQU     $DB54         ;キーボード1Byte入力ルーチン
+00018      FBFA         RETADD   EQU     $FBFA         ;本来のBIOSジャンプルーチンエントリ
+00019      FE05         SNDBYTE  EQU     $FE05         ;(BOOTROM)Arduinoへ1Byte送信
+00020      FE08         RCVBYTE  EQU     $FE08         ;(BOOTROM)Arduinoから1Byte受信
+00021      FE0B         MOTOR    EQU     $FE0B         ;(BOOTROM)BIOS[01]モーター制御
+00022      FE0E         WRITE1BYTE EQU   $FE0E         ;(BOOTROM)BIOS[02]SD-CARDへ1Byte書き込み
+00023      FE11         READ1BYTE EQU    $FE11         ;(BOOTROM)BIOS[03]SD-CARDから1Byte読み込み
+00024                   *
+00025 0790              START    
+00026                   * 拡張コマンドテーブルを#NEWTBLにコピーして拡張コマンド「SDIR」「SETL」「SETS」「SDON」「CMT」を追加
+00027 0790 F60203                LDB     EXTNUM        ;B <- 拡張コマンド数
+00028 0793 7C0203                INC     EXTNUM        ;拡張コマンド数+1
+00029 0796 7C0203                INC     EXTNUM        ;拡張コマンド数+1
+00030 0799 7C0203                INC     EXTNUM        ;拡張コマンド数+1
+00031 079C 7C0203                INC     EXTNUM        ;拡張コマンド数+1
+00032 079F 7C0203                INC     EXTNUM        ;拡張コマンド数+1
+00033 07A2 BE0204                LDX     EXTTBL        ;X <- 旧拡張コマンドTBLアドレス
+00034 07A5 338D0345              LEAU    NEWTBL,PCR    ;U <- 新拡張コマンドTBLアドレス
+00035 07A9 FF0204                STU     EXTTBL        ;拡張コマンドTBLポインタ <- 新拡張コマンドTBLアドレス
+00036                   *
+00037 07AC A680         COPY     LDA     ,X+           ;拡張コマンドTBLをコピー
+00038 07AE A7C0                  STA     ,U+
+00039 07B0 2AFA                  BPL     COPY          ;BIT7が1になるまでループ
+00040 07B2 5A                    DECB                  ;カウンタ-1
+00041 07B3 26F7                  BNE     COPY          ;カウンタが0になるまでループ
+00042                   *
+00043 07B5 8653                  LDA     #'S           ;「SDIR」コマンドを追加
+00044 07B7 C644                  LDB     #'D
+00045 07B9 EDC1                  STD     ,U++
+00046 07BB 8649                  LDA     #'I
+00047 07BD C6D2                  LDB     #'R+$80
+00048 07BF EDC1                  STD     ,U++
+00049                   *
+00050 07C1 8653                  LDA     #'S           ;「SETL」コマンドを追加
+00051 07C3 C645                  LDB     #'E
+00052 07C5 EDC1                  STD     ,U++
+00053 07C7 8654                  LDA     #'T
+00054 07C9 C6CC                  LDB     #'L+$80
+00055 07CB EDC1                  STD     ,U++
+00056                   *
+00057 07CD 8653                  LDA     #'S           ;「SETS」コマンドを追加
+00058 07CF C645                  LDB     #'E
+00059 07D1 EDC1                  STD     ,U++
+00060 07D3 8654                  LDA     #'T
+00061 07D5 C6D3                  LDB     #'S+$80
+00062 07D7 EDC1                  STD     ,U++
+00063 07D9                       
+00064 07D9 8653                  LDA     #'S           ;「SDON」コマンドを追加
+00065 07DB C644                  LDB     #'D
+00066 07DD EDC1                  STD     ,U++
+00067 07DF 864F                  LDA     #'O
+00068 07E1 C6CE                  LDB     #'N+$80
+00069 07E3 EDC1                  STD     ,U++
+00070 07E5                       
+00071 07E5 8643                  LDA     #'C           ;「CMT」コマンドを追加
+00072 07E7 C64D                  LDB     #'M
+00073 07E9 EDC1                  STD     ,U++
+00074 07EB 86D4                  LDA     #'T+$80
+00075 07ED C600                  LDB     #$00
+00076 07EF EDC0                  STD     ,U+
+00077 07F1                       
+00078 07F1 308D0016              LEAX    NEWTRN,PCR    ;追加コマンド判定ルーチンアドレス
+00079 07F5 BF0210                STX     EXTTRN        ;拡張コマンド判定後のジャンプ先アドレスポインタを追加コマンド判定ルーチンアドレスに書き換え
+00080 07F8                       
+00081                   *BIOS CWRITE CREADフック
+00082 07F8 308D01E8     BIOSF    LEAX    BIOSR,PCR
+00083 07FC 9FDF                  STX     BIOSV+1       ;($DF) <- BIOSフック用ルーチンアドレス
+00084 07FE                       
+00085                   *SD関連書き換え終了メッセージ
+00086 07FE 0FBF                  CLR     <FILENO       ;($00BF) <- 0 画面出力へ設定
+00087 0800 308D01FF              LEAX    MSG1,PCR
+00088 0804 BDD90F                JSR     LOUT1         ;「FM-7_SD READY OK!」を表示
+00089 0807                       
+00090 0807 39                    RTS                   ;BASICへ戻る
+00091 0808                       
+00092                   *
+00093 0808 7E92A0       ERR02    JMP     ERRENT
+00094 080B                       
+00095                   *追加コマンド判定ルーチン
+00096 080B 81F4         NEWTRN   CMPA    #$F4          ;「SDIR」判定
+00097 080D 2604                  BNE     NEWTRN2
+00098 080F 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
+00099 0811 2024                  BRA     SDIR_PRG
+00100 0813 81F5         NEWTRN2  CMPA    #$F5          ;「SETL」判定
+00101 0815 2605                  BNE     NEWTRN3
+00102 0817 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
+00103 0819 1600F9                LBRA    SETL_PRG
+00104 081C 81F6         NEWTRN3  CMPA    #$F6          ;「SETS」判定
+00105 081E 2605                  BNE     NEWTRN4
+00106 0820 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
+00107 0822 16012E                LBRA    SETS_PRG
+00108 0825 81F7         NEWTRN4  CMPA    #$F7          ;「SDON」判定
+00109 0827 2605                  BNE     NEWTRN5
+00110 0829 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
+00111 082B 160161                LBRA    SDON_PRG
+00112 082E 81F8         NEWTRN5  CMPA    #$F8          ;「CMT」判定
+00113 0830 26D6                  BNE     ERR02         ;どれでもなければエラー
+00114 0832 9DD2                  JSR     READ1         ;入力コマンド解釈ポインタ+1
+00115 0834 160168                LBRA    CMT_PRG
+00116                   *
+00117                   *「SDIR」処理
+00118 0837              SDIR_PRG
+00119 0837 8652                  LDA     #$52
+00120 0839 BDFE05                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00121 083C BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
+00122 083F 4D                    TSTA
+00123 0840 1026016A              LBNE    ERRC
+00124 0844                       
+00125 0844 9DD8                  JSR     READ0         ;SDIRの次に文字列があるか?
+00126 0846 260B                  BNE     SDIR1         ;あればSDIR1へ
+00127 0848 4F                    CLRA
+00128 0849 BDFE05                JSR     SNDBYTE       ;継続指示
+00129 084C 8601                  LDA     #$01
+00130 084E BDFE05                JSR     SNDBYTE       ;なければ送信文字列数1文字として終了コード送信へ
+00131 0851 2020                  BRA     SDIR3
+00132 0853 8122         SDIR1    CMPA    #$22          ;次の文字がダブルコーテーションでなかったらエラー
+00133 0855 102600A6              LBNE    ERRNAME
+00134 0859 4F                    CLRA
+00135 085A BDFE05                JSR     SNDBYTE       ;継続指示
+00136 085D BD98F1                JSR     GETSTR        ;文字列取得
+00137 0860 3404                  PSHS    B
+00138 0862 3502                  PULS    A
+00139 0864 4C                    INCA
+00140 0865 BDFE05                JSR     SNDBYTE       ;文字列数を送信
+00141 0868 A680         SDIR2    LDA     ,X+
+00142 086A BDC495                JSR     AZLCNV        ;文字列を1文字取得して大文字に変換
+00143 086D BDFE05                JSR     SNDBYTE       ;送信
+00144 0870 5A                    DECB
+00145 0871 26F5                  BNE     SDIR2
+00146 0873                       
+00147 0873 4F           SDIR3    CLRA
+00148 0874 BDFE05                JSR     SNDBYTE       ;文字列送信終了コード送信
+00149 0877                       
+00150 0877 BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
+00151 087A 4D                    TSTA
+00152 087B 1026012F              LBNE    ERRC          ;エラー処理へ
+00153 087F                       
+00154 087F 0FBF                  CLR     <FILENO
+00155 0881 108E053F     DL1      LDY     #LBUF         ;Arduinoから送られてくる文字列を#LBUFへ格納
+00156 0885 BDFE08       DL2      JSR     RCVBYTE
+00157 0888 4D                    TSTA
+00158 0889 2710                  BEQ     DL3           ;$00を受信するまでを一行とする
+00159 088B 81FF                  CMPA    #$FF
+00160 088D 271F                  BEQ     DL4           ;$FFを受信したら終了
+00161 088F 81FD                  CMPA    #$FD
+00162 0891 271F                  BEQ     DL9           ;$FD受信で文字列を取得してSETLしたことを表示
+00163 0893 81FE                  CMPA    #$FE
+00164 0895 273B                  BEQ     DL5           ;$FEを受信したら一時停止して一文字入力待ち
+00165 0897 A7A0                  STA     ,Y+
+00166 0899 20EA                  BRA     DL2
+00167 089B                       
+00168 089B              DL3
+00169 089B 860D                  LDA     #$0D          ;$00を受信したら一行分を表示して改行
 00170 089D A7A0                  STA     ,Y+
-00171 089F                       
-00172 089F 4F                    CLRA
-00173 08A0 A7A0                  STA     ,Y+
-00174 08A2 8E053F                LDX     #LBUF
-00175 08A5 BDD90F                JSR     LOUT1
-00176 08A8 20D3         DL33     BRA     DL1
-00177 08AA                       
-00178 08AA BDFE08       DL4      JSR     RCVBYTE       ;状態取得(00H=OK)して終了
-00179 08AD 39                    RTS
-00180 08AE                       
-00181 08AE 108E053F     DL9      LDY     #LBUF         ;文字列を取得してSETLしたことを表示
-00182 08B2 BDFE08       DL91     JSR     RCVBYTE       ;#LBUFへ文字列格納
-00183 08B5 A7A0                  STA     ,Y+
-00184 08B7 4D                    TSTA                  ;$00を受信するまで受信処理
-00185 08B8 26F8                  BNE     DL91
-00186 08BA 8E053F                LDX     #LBUF
-00187 08BD BDD90F                JSR     LOUT1
-00188 08C0 8E0A18                LDX     #MSG3
-00189 08C3 BDD90F                JSR     LOUT1         ;SETLしたことを表示
-00190 08C6 BDFE08                JSR     RCVBYTE       ;状態取得読み飛ばし
-00191 08C9 BDFE08                JSR     RCVBYTE       ;状態取得読み飛ばし
-00192 08CC 39                    RTS
-00193 08CD                       
-00194 08CD 8E0A59       DL5      LDX     #MSGKEY       ;一時停止して一文字入力待ち
-00195 08D0 BDD90F                JSR     LOUT1         ;HIT ANT KEY表示
-00196 08D3 BDDB54       DL6      JSR     INPUT1
-00197 08D6 811B                  CMPA    #$1B
-00198 08D8 2717                  BEQ     DL7           ;ESCで打ち切り
-00199 08DA 8130                  CMPA    #$30          ;数字0～9ならそのままArduinoへ送信してSETL処理へ
-00200 08DC 2504                  BLO     DL61
-00201 08DE 813A                  CMPA    #$3A
-00202 08E0 2511                  BLO     DL8           
-00203 08E2 8142         DL61     CMPA    #$42
-00204 08E4 270D                  BEQ     DL8           ;「B」で前ページ
-00205 08E6 8162                  CMPA    #$62
-00206 08E8 2703                  BEQ     DL62          ;「b」で前ページ
-00207 08EA 4F                    CLRA
-00208 08EB 2006                  BRA     DL8           ;それ以外で継続
-00209 08ED 8642         DL62     LDA     #$42          ;b->B
-00210 08EF 2002                  BRA     DL8
-00211 08F1 86FF         DL7      LDA     #$FF
-00212 08F3 BDFE05       DL8      JSR     SNDBYTE
-00213 08F6 2089                  BRA     DL2
-00214 08F8                       
-00215 08F8 39           SDIR99   RTS
-00216 08F9                       
-00217 08F9 3402         ERRNAME  PSHS    A
-00218 08FB 86FF                  LDA     #$FF
-00219 08FD BDFE05                JSR     SNDBYTE       ;打ち切り指示
-00220 0900 3502                  PULS    A
-00221 0902 4D                    TSTA                  ;$00ならポインタを進めない SETL SETSのみはERROR
-00222 0903 2705                  BEQ     ERRNM2
-00223 0905 9DD2         ERRNM1   JSR     READ1         ;入力コマンド解釈ポインタ+1
-00224 0907 4D                    TSTA
-00225 0908 26FB                  BNE     ERRNM1
-00226 090A 86F5         ERRNM2   LDA     #$F5          ;NOT DOUBLE QUOTATION表示
-00227 090C 160094                LBRA    ERRC
-00228 090F                       
-00229                   *「SETL」処理
-00230 090F              SETL_PRG
-00231 090F 8653                  LDA     #$53
-00232 0911 BDFE05                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
-00233 0914 BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
-00234 0917 4D                    TSTA
-00235 0918 10260087              LBNE    ERRC
-00236 091C 9DD8                  JSR     READ0
-00237 091E 8122                  CMPA    #$22          ;次の文字がダブルコーテーションでなかったらエラー
-00238 0920 26D7                  BNE     ERRNAME
-00239 0922 4F                    CLRA
-00240 0923 BDFE05                JSR     SNDBYTE       ;継続指示
-00241 0926 BD98F1                JSR     GETSTR        ;文字列取得
-00242 0929 3404                  PSHS    B
-00243 092B 3502                  PULS    A
-00244 092D 4C                    INCA
-00245 092E BDFE05                JSR     SNDBYTE       ;文字列数送信
-00246 0931                       
-00247 0931              SETL1
-00248 0931 A680                  LDA     ,X+           ;文字列送信
-00249 0933 BDFE05                JSR     SNDBYTE
-00250 0936 5A                    DECB
-00251 0937 26F8                  BNE     SETL1
-00252 0939 4F                    CLRA
-00253 093A BDFE05                JSR     SNDBYTE
-00254 093D                       
-00255 093D BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
-00256 0940 4D                    TSTA
-00257 0941 2660                  BNE     ERRC
-00258 0943                       
-00259 0943 0FBF                  CLR     <FILENO       ;LOAD FILE SET OK!表示
-00260 0945 8E0A18                LDX     #MSG3
-00261 0948 BDD90F                JSR     LOUT1
-00262 094B 39                    RTS
-00263 094C                       
-00264                   *「SETS」処理
-00265 094C              SETS_PRG
-00266 094C 8654                  LDA     #$54
-00267 094E BDFE05                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
-00268 0951 BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
-00269 0954 4D                    TSTA
-00270 0955 264C                  BNE     ERRC
-00271 0957 9DD8                  JSR     READ0
-00272 0959 8122                  CMPA    #$22          ;次の文字がダブルコーテーションでなかったらエラー
-00273 095B 269C                  BNE     ERRNAME
-00274 095D 4F                    CLRA
-00275 095E BDFE05                JSR     SNDBYTE       ;継続指示
-00276 0961 BD98F1                JSR     GETSTR        ;文字列取得
-00277 0964 3404                  PSHS    B
-00278 0966 3502                  PULS    A
-00279 0968 4C                    INCA
-00280 0969 BDFE05                JSR     SNDBYTE       ;文字列数送信
-00281 096C                       
-00282 096C              SETS1
-00283 096C A680                  LDA     ,X+           ;文字列送信
-00284 096E BDFE05                JSR     SNDBYTE
-00285 0971 5A                    DECB
-00286 0972 26F8                  BNE     SETS1
-00287 0974 4F                    CLRA
-00288 0975 BDFE05                JSR     SNDBYTE
-00289 0978                       
-00290 0978 BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
-00291 097B 4D                    TSTA
-00292 097C 2625                  BNE     ERRC
-00293 097E                       
-00294 097E 0FBF                  CLR     <FILENO       ;SAVE FILE SET OK!表示
-00295 0980 8E0A2C                LDX     #MSG4
-00296 0983 BDD90F                JSR     LOUT1
-00297 0986 39                    RTS
-00298 0987                       
-00299                   *「SDON」処理
-00300 0987              SDON_PRG
-00301 0987                       
-00302                   *BIOS CWRITE CREADフック	;CMTコマンドでBIOSフックをCMTに戻したときにSDへ再度変更する
-00303 0987 8E09D9                LDX     #BIOSR
-00304 098A 9FDF                  STX     BIOSV+1       ;($DF) <- BIOSフック用ルーチンアドレス
-00305 098C                       
-00306 098C 0FBF                  CLR     <FILENO       ;SD ON OK!表示
-00307 098E 8E0A40                LDX     #MSG5
-00308 0991 BDD90F                JSR     LOUT1
-00309 0994 39                    RTS
-00310 0995                       
-00311                   *「CMT」処理
-00312 0995              CMT_PRG
-00313 0995                       
-00314                   *BIOS CWRITE CREADフック	;変更したBIOSフックを元にもどしてCMTを有効にする
-00315 0995 8EF17D                LDX     #$F17D
-00316 0998 9FDF                  STX     BIOSV+1       ;($DF) <- BIOS通常処理へ
-00317 099A                       
-00318 099A 0FBF                  CLR     <FILENO       ;CMT ON OK!表示
-00319 099C 8E0A4C                LDX     #MSG6
-00320 099F BDD90F                JSR     LOUT1
-00321 09A2 39                    RTS
-00322 09A3                       
-00323 09A3 0FBF         ERRC     CLR     <FILENO
-00324 09A5 81F0                  CMPA    #$F0
-00325 09A7 2605                  BNE     ERR1
-00326 09A9 8E0A80                LDX     #ERR_F0
-00327 09AC 2027                  BRA     ERRR
-00328 09AE 81F1         ERR1     CMPA    #$F1
-00329 09B0 2605                  BNE     ERR2
-00330 09B2 8E0A99                LDX     #ERR_F1
-00331 09B5 201E                  BRA     ERRR
-00332 09B7 81F2         ERR2     CMPA    #$F2
-00333 09B9 2605                  BNE     ERR3
-00334 09BB 8E0AAA                LDX     #ERR_F2
-00335 09BE 2015                  BRA     ERRR
-00336 09C0 81F4         ERR3     CMPA    #$F4
-00337 09C2 2605                  BNE     ERR4
-00338 09C4 8E0ABC                LDX     #ERR_F4
-00339 09C7 200C                  BRA     ERRR
-00340 09C9 81F5         ERR4     CMPA    #$F5
-00341 09CB 2605                  BNE     ERR99
-00342 09CD 8E0AC8                LDX     #ERR_F5
-00343 09D0 2003                  BRA     ERRR
-00344 09D2                       
-00345 09D2 8E0ADF       ERR99    LDX     #ERR_F99
-00346 09D5                       
-00347 09D5 BDD90F       ERRR     JSR     LOUT1
-00348 09D8 39                    RTS
-00349 09D9                       
-00350                   *BIOS CWRITE CREADフック
-00351 09D9 347F         BIOSR    PSHS    U,Y,X,DP,D,CC
-00352 09DB E684                  LDB     ,X            ;B <- RQNO
-00353 09DD C101                  CMPB    #1
-00354 09DF 270E                  BEQ     BIOSR1
-00355 09E1 C102                  CMPB    #2            ;RQNOが2なら1Byte書出し処理へ
-00356 09E3 270D                  BEQ     BIOSR2
-00357 09E5 C103                  CMPB    #3            ;RQNOが3なら1Byte読み込み処理へ
-00358 09E7 270C                  BEQ     BIOSR3
-00359 09E9 357F                  PULS    CC,D,DP,X,Y,U
-00360 09EB 6E9FFBFA              JMP     [RETADD]      ;以外なら本来のBIOS処理継続
-00361 09EF                       
-00362 09EF 7EFE0B       BIOSR1   JMP     MOTOR
-00363 09F2 7EFE0E       BIOSR2   JMP     WRITE1BYTE
-00364 09F5 7EFE11       BIOSR3   JMP     READ1BYTE
-00365 09F8                       
-00366 09F8 464D2D375F53 MSG1     FCC     /FM-7_SD READY OK!/ 
-      09FE 442052454144
-      0A04 59204F4B21  
-00367 0A09 0D0A00                FCB     $0D,$0A,$00
-00368 0A0C                       
-00369 0A0C 534449522054 MSG2     FCC     /SDIR TEST/   
-      0A12 455354      
-00370 0A15 0D0A00                FCB     $0D,$0A,$00
-00371 0A18                       
-00372 0A18 4C4F41442046 MSG3     FCC     /LOAD FILE SET OK!/ 
-      0A1E 494C45205345
-      0A24 54204F4B21  
-00373 0A29 0D0A00                FCB     $0D,$0A,$00
-00374 0A2C                       
-00375 0A2C 534156452046 MSG4     FCC     /SAVE FILE SET OK!/ 
-      0A32 494C45205345
-      0A38 54204F4B21  
-00376 0A3D 0D0A00                FCB     $0D,$0A,$00
-00377 0A40                       
-00378 0A40 5344204F4E20 MSG5     FCC     /SD ON OK!/   
-      0A46 4F4B21      
-00379 0A49 0D0A00                FCB     $0D,$0A,$00
-00380 0A4C                       
-00381 0A4C 434D54204F4E MSG6     FCC     /CMT ON OK!/  
-      0A52 204F4B21    
-00382 0A56 0D0A00                FCB     $0D,$0A,$00
-00383 0A59                       
-00384 0A59 53454C454354 MSGKEY   FCC     /SELECT:0-9 NEXT:ANY BACK:B BREAK:ESC/ 
-      0A5F 3A302D39204E
-      0A65 4558543A414E
-      0A6B 59204241434B
-      0A71 3A4220425245
-      0A77 414B3A455343
-00385 0A7D 0D0A00                FCB     $0D,$0A,$00
-00386 0A80                       
-00387 0A80 534420434152 ERR_F0   FCC     /SD CARD INITIATE ERROR/ 
-      0A86 4420494E4954
-      0A8C 494154452045
-      0A92 52524F52    
-00388 0A96 0D0A00                FCB     $0D,$0A,$00
-00389 0A99                       
-00390 0A99 46494C45204E ERR_F1   FCC     /FILE NOT FOUND/ 
-      0A9F 4F5420464F55
-      0AA5 4E44        
-00391 0AA7 0D0A00                FCB     $0D,$0A,$00
-00392 0AAA                       
-00393 0AAA 46494C45204F ERR_F2   FCC     /FILE OPEN ERROR/ 
-      0AB0 50454E204552
-      0AB6 524F52      
-00394 0AB9 0D0A00                FCB     $0D,$0A,$00
-00395 0ABC                       
-00396 0ABC 434D44204552 ERR_F4   FCC     /CMD ERROR/   
-      0AC2 524F52      
-00397 0AC5 0D0A00                FCB     $0D,$0A,$00
-00398 0AC8                       
-00399 0AC8 4E4F5420444F ERR_F5   FCC     /NOT DOUBLE QUOTATION/ 
-      0ACE 55424C452051
-      0AD4 554F54415449
-      0ADA 4F4E        
-00400 0ADC 0D0A00                FCB     $0D,$0A,$00
-00401 0ADF                       
-00402 0ADF 554E4B4E4F57 ERR_F99  FCC     /UNKNOWN ERROR/ 
-      0AE5 4E204552524F
-      0AEB 52          
-00403 0AEC 0D0A00                FCB     $0D,$0A,$00
-00404 0AEF                       
-00405                   *新拡張コマンドTBL
-00406 0AEF              NEWTBL   RMB     64
-00407 0B2F 454E                  FCC     /EN/          ;NEWTBL領域の終わり位置を示す
-00408 0B31                       
-00409 0B31                       END
+00171 089F 860A                  LDA     #$0A
+00172 08A1 A7A0                  STA     ,Y+
+00173 08A3                       
+00174 08A3 4F                    CLRA
+00175 08A4 A7A0                  STA     ,Y+
+00176 08A6 8E053F                LDX     #LBUF
+00177 08A9 BDD90F                JSR     LOUT1
+00178 08AC 20D3         DL33     BRA     DL1
+00179 08AE                       
+00180 08AE BDFE08       DL4      JSR     RCVBYTE       ;状態取得(00H=OK)して終了
+00181 08B1 39                    RTS
+00182 08B2                       
+00183 08B2 108E053F     DL9      LDY     #LBUF         ;文字列を取得してSETLしたことを表示
+00184 08B6 BDFE08       DL91     JSR     RCVBYTE       ;#LBUFへ文字列格納
+00185 08B9 A7A0                  STA     ,Y+
+00186 08BB 4D                    TSTA                  ;$00を受信するまで受信処理
+00187 08BC 26F8                  BNE     DL91
+00188 08BE 8E053F                LDX     #LBUF
+00189 08C1 BDD90F                JSR     LOUT1
+00190 08C4 308D014F              LEAX    MSG3,PCR
+00191 08C8 BDD90F                JSR     LOUT1         ;SETLしたことを表示
+00192 08CB BDFE08                JSR     RCVBYTE       ;状態取得読み飛ばし
+00193 08CE BDFE08                JSR     RCVBYTE       ;状態取得読み飛ばし
+00194 08D1 39                    RTS
+00195 08D2                       
+00196 08D2 308D0182     DL5      LEAX    MSGKEY,PCR    ;一時停止して一文字入力待ち
+00197 08D6 BDD90F                JSR     LOUT1         ;HIT ANT KEY表示
+00198 08D9 BDDB54       DL6      JSR     INPUT1
+00199 08DC 811B                  CMPA    #$1B
+00200 08DE 2717                  BEQ     DL7           ;ESCで打ち切り
+00201 08E0 8130                  CMPA    #$30          ;数字0～9ならそのままArduinoへ送信してSETL処理へ
+00202 08E2 2504                  BLO     DL61
+00203 08E4 813A                  CMPA    #$3A
+00204 08E6 2511                  BLO     DL8           
+00205 08E8 8142         DL61     CMPA    #$42
+00206 08EA 270D                  BEQ     DL8           ;「B」で前ページ
+00207 08EC 8162                  CMPA    #$62
+00208 08EE 2703                  BEQ     DL62          ;「b」で前ページ
+00209 08F0 4F                    CLRA
+00210 08F1 2006                  BRA     DL8           ;それ以外で継続
+00211 08F3 8642         DL62     LDA     #$42          ;b->B
+00212 08F5 2002                  BRA     DL8
+00213 08F7 86FF         DL7      LDA     #$FF
+00214 08F9 BDFE05       DL8      JSR     SNDBYTE
+00215 08FC 2087                  BRA     DL2
+00216 08FE                       
+00217 08FE 39           SDIR99   RTS
+00218 08FF                       
+00219 08FF 3402         ERRNAME  PSHS    A
+00220 0901 86FF                  LDA     #$FF
+00221 0903 BDFE05                JSR     SNDBYTE       ;打ち切り指示
+00222 0906 3502                  PULS    A
+00223 0908 4D                    TSTA                  ;$00ならポインタを進めない SETL SETSのみはERROR
+00224 0909 2705                  BEQ     ERRNM2
+00225 090B 9DD2         ERRNM1   JSR     READ1         ;入力コマンド解釈ポインタ+1
+00226 090D 4D                    TSTA
+00227 090E 26FB                  BNE     ERRNM1
+00228 0910 86F5         ERRNM2   LDA     #$F5          ;NOT DOUBLE QUOTATION表示
+00229 0912 160099                LBRA    ERRC
+00230 0915                       
+00231                   *「SETL」処理
+00232 0915              SETL_PRG
+00233 0915 8653                  LDA     #$53
+00234 0917 BDFE05                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00235 091A BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
+00236 091D 4D                    TSTA
+00237 091E 1026008C              LBNE    ERRC
+00238 0922 9DD8                  JSR     READ0
+00239 0924 8122                  CMPA    #$22          ;次の文字がダブルコーテーションでなかったらエラー
+00240 0926 26D7                  BNE     ERRNAME
+00241 0928 4F                    CLRA
+00242 0929 BDFE05                JSR     SNDBYTE       ;継続指示
+00243 092C BD98F1                JSR     GETSTR        ;文字列取得
+00244 092F 3404                  PSHS    B
+00245 0931 3502                  PULS    A
+00246 0933 4C                    INCA
+00247 0934 BDFE05                JSR     SNDBYTE       ;文字列数送信
+00248 0937                       
+00249 0937              SETL1
+00250 0937 A680                  LDA     ,X+           ;文字列送信
+00251 0939 BDFE05                JSR     SNDBYTE
+00252 093C 5A                    DECB
+00253 093D 26F8                  BNE     SETL1
+00254 093F 4F                    CLRA
+00255 0940 BDFE05                JSR     SNDBYTE
+00256 0943                       
+00257 0943 BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
+00258 0946 4D                    TSTA
+00259 0947 2665                  BNE     ERRC
+00260 0949                       
+00261 0949 0FBF                  CLR     <FILENO       ;LOAD FILE SET OK!表示
+00262 094B 308D00C8              LEAX    MSG3,PCR
+00263 094F BDD90F                JSR     LOUT1
+00264 0952 39                    RTS
+00265 0953                       
+00266                   *「SETS」処理
+00267 0953              SETS_PRG
+00268 0953 8654                  LDA     #$54
+00269 0955 BDFE05                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00270 0958 BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
+00271 095B 4D                    TSTA
+00272 095C 2650                  BNE     ERRC
+00273 095E 9DD8                  JSR     READ0
+00274 0960 8122                  CMPA    #$22          ;次の文字がダブルコーテーションでなかったらエラー
+00275 0962 269B                  BNE     ERRNAME
+00276 0964 4F                    CLRA
+00277 0965 BDFE05                JSR     SNDBYTE       ;継続指示
+00278 0968 BD98F1                JSR     GETSTR        ;文字列取得
+00279 096B 3404                  PSHS    B
+00280 096D 3502                  PULS    A
+00281 096F 4C                    INCA
+00282 0970 BDFE05                JSR     SNDBYTE       ;文字列数送信
+00283 0973                       
+00284 0973              SETS1
+00285 0973 A680                  LDA     ,X+           ;文字列送信
+00286 0975 BDFE05                JSR     SNDBYTE
+00287 0978 5A                    DECB
+00288 0979 26F8                  BNE     SETS1
+00289 097B 4F                    CLRA
+00290 097C BDFE05                JSR     SNDBYTE
+00291 097F                       
+00292 097F BDFE08                JSR     RCVBYTE       ;状態取得(00H=OK)
+00293 0982 4D                    TSTA
+00294 0983 2629                  BNE     ERRC
+00295 0985                       
+00296 0985 0FBF                  CLR     <FILENO       ;SAVE FILE SET OK!表示
+00297 0987 308D00A0              LEAX    MSG4,PCR
+00298 098B BDD90F                JSR     LOUT1
+00299 098E 39                    RTS
+00300 098F                       
+00301                   *「SDON」処理
+00302 098F              SDON_PRG
+00303 098F                       
+00304                   *BIOS CWRITE CREADフック	;CMTコマンドでBIOSフックをCMTに戻したときにSDへ再度変更する
+00305 098F 308D0051              LEAX    BIOSR,PCR
+00306 0993 9FDF                  STX     BIOSV+1       ;($DF) <- BIOSフック用ルーチンアドレス
+00307 0995                       
+00308 0995 0FBF                  CLR     <FILENO       ;SD ON OK!表示
+00309 0997 308D00A4              LEAX    MSG5,PCR
+00310 099B BDD90F                JSR     LOUT1
+00311 099E 39                    RTS
+00312 099F                       
+00313                   *「CMT」処理
+00314 099F              CMT_PRG
+00315 099F                       
+00316                   *BIOS CWRITE CREADフック	;変更したBIOSフックを元にもどしてCMTを有効にする
+00317 099F 8EF17D                LDX     #$F17D
+00318 09A2 9FDF                  STX     BIOSV+1       ;($DF) <- BIOS通常処理へ
+00319 09A4                       
+00320 09A4 0FBF                  CLR     <FILENO       ;CMT ON OK!表示
+00321 09A6 308D00A1              LEAX    MSG6,PCR
+00322 09AA BDD90F                JSR     LOUT1
+00323 09AD 39                    RTS
+00324 09AE                       
+00325 09AE 0FBF         ERRC     CLR     <FILENO
+00326 09B0 81F0                  CMPA    #$F0
+00327 09B2 2605                  BNE     ERR1
+00328 09B4 8E0A7F                LDX     #ERR_F0
+00329 09B7 2027                  BRA     ERRR
+00330 09B9 81F1         ERR1     CMPA    #$F1
+00331 09BB 2605                  BNE     ERR2
+00332 09BD 8E0A98                LDX     #ERR_F1
+00333 09C0 201E                  BRA     ERRR
+00334 09C2 81F2         ERR2     CMPA    #$F2
+00335 09C4 2605                  BNE     ERR3
+00336 09C6 8E0AA9                LDX     #ERR_F2
+00337 09C9 2015                  BRA     ERRR
+00338 09CB 81F4         ERR3     CMPA    #$F4
+00339 09CD 2605                  BNE     ERR4
+00340 09CF 8E0ABB                LDX     #ERR_F4
+00341 09D2 200C                  BRA     ERRR
+00342 09D4 81F5         ERR4     CMPA    #$F5
+00343 09D6 2605                  BNE     ERR99
+00344 09D8 8E0AC7                LDX     #ERR_F5
+00345 09DB 2003                  BRA     ERRR
+00346 09DD                       
+00347 09DD 8E0ADE       ERR99    LDX     #ERR_F99
+00348 09E0                       
+00349 09E0 BDD90F       ERRR     JSR     LOUT1
+00350 09E3 39                    RTS
+00351 09E4                       
+00352                   *BIOS CWRITE CREADフック
+00353 09E4 347F         BIOSR    PSHS    U,Y,X,DP,D,CC
+00354 09E6 E684                  LDB     ,X            ;B <- RQNO
+00355 09E8 C101                  CMPB    #1
+00356 09EA 270E                  BEQ     BIOSR1
+00357 09EC C102                  CMPB    #2            ;RQNOが2なら1Byte書出し処理へ
+00358 09EE 270D                  BEQ     BIOSR2
+00359 09F0 C103                  CMPB    #3            ;RQNOが3なら1Byte読み込み処理へ
+00360 09F2 270C                  BEQ     BIOSR3
+00361 09F4 357F                  PULS    CC,D,DP,X,Y,U
+00362 09F6 6E9FFBFA              JMP     [RETADD]      ;以外なら本来のBIOS処理継続
+00363 09FA                       
+00364 09FA 7EFE0B       BIOSR1   JMP     MOTOR
+00365 09FD 7EFE0E       BIOSR2   JMP     WRITE1BYTE
+00366 0A00 7EFE11       BIOSR3   JMP     READ1BYTE
+00367 0A03                       
+00368 0A03 464D2D375F53 MSG1     FCC     /FM-7_SD READY OK!/ 
+      0A09 442052454144
+      0A0F 59204F4B21  
+00369 0A14 0D0A00                FCB     $0D,$0A,$00
+00370 0A17                       
+00371 0A17 4C4F41442046 MSG3     FCC     /LOAD FILE SET OK!/ 
+      0A1D 494C45205345
+      0A23 54204F4B21  
+00372 0A28 0D0A00                FCB     $0D,$0A,$00
+00373 0A2B                       
+00374 0A2B 534156452046 MSG4     FCC     /SAVE FILE SET OK!/ 
+      0A31 494C45205345
+      0A37 54204F4B21  
+00375 0A3C 0D0A00                FCB     $0D,$0A,$00
+00376 0A3F                       
+00377 0A3F 5344204F4E20 MSG5     FCC     /SD ON OK!/   
+      0A45 4F4B21      
+00378 0A48 0D0A00                FCB     $0D,$0A,$00
+00379 0A4B                       
+00380 0A4B 434D54204F4E MSG6     FCC     /CMT ON OK!/  
+      0A51 204F4B21    
+00381 0A55 0D0A00                FCB     $0D,$0A,$00
+00382 0A58                       
+00383 0A58 53454C454354 MSGKEY   FCC     /SELECT:0-9 NEXT:ANY BACK:B BREAK:ESC/ 
+      0A5E 3A302D39204E
+      0A64 4558543A414E
+      0A6A 59204241434B
+      0A70 3A4220425245
+      0A76 414B3A455343
+00384 0A7C 0D0A00                FCB     $0D,$0A,$00
+00385 0A7F                       
+00386 0A7F 534420434152 ERR_F0   FCC     /SD CARD INITIATE ERROR/ 
+      0A85 4420494E4954
+      0A8B 494154452045
+      0A91 52524F52    
+00387 0A95 0D0A00                FCB     $0D,$0A,$00
+00388 0A98                       
+00389 0A98 46494C45204E ERR_F1   FCC     /FILE NOT FOUND/ 
+      0A9E 4F5420464F55
+      0AA4 4E44        
+00390 0AA6 0D0A00                FCB     $0D,$0A,$00
+00391 0AA9                       
+00392 0AA9 46494C45204F ERR_F2   FCC     /FILE OPEN ERROR/ 
+      0AAF 50454E204552
+      0AB5 524F52      
+00393 0AB8 0D0A00                FCB     $0D,$0A,$00
+00394 0ABB                       
+00395 0ABB 434D44204552 ERR_F4   FCC     /CMD ERROR/   
+      0AC1 524F52      
+00396 0AC4 0D0A00                FCB     $0D,$0A,$00
+00397 0AC7                       
+00398 0AC7 4E4F5420444F ERR_F5   FCC     /NOT DOUBLE QUOTATION/ 
+      0ACD 55424C452051
+      0AD3 554F54415449
+      0AD9 4F4E        
+00399 0ADB 0D0A00                FCB     $0D,$0A,$00
+00400 0ADE                       
+00401 0ADE 554E4B4E4F57 ERR_F99  FCC     /UNKNOWN ERROR/ 
+      0AE4 4E204552524F
+      0AEA 52          
+00402 0AEB 0D0A00                FCB     $0D,$0A,$00
+00403 0AEE                       
+00404                   *新拡張コマンドTBL
+00405 0AEE              NEWTBL   RMB     64
+00406 0B2E 454E                  FCC     /EN/          ;NEWTBL領域の終わり位置を示す
+00407 0B30                       
+00408 0B30                       END
 
 SYMBOL TABLE
 
@@ -441,19 +439,18 @@ SYMBOL TABLE
 0204 EXTTBL     0210 EXTTRN     053F LBUF       92A0 ERRENT     98F1 GETSTR  
 C495 AZLCNV     D90F LOUT1      DB54 INPUT1     FBFA RETADD     FE05 SNDBYTE 
 FE08 RCVBYTE    FE0B MOTOR      FE0E WRITE1BY   FE11 READ1BYT   0790 START   
-07AB COPY       07F6 BIOSF      0804 ERR02      0807 NEWTRN     080F NEWTRN2 
-0818 NEWTRN3    0821 NEWTRN4    082A NEWTRN5    0833 SDIR_PRG   084F SDIR1   
-0864 SDIR2      086F SDIR3      087D DL1        0881 DL2        0897 DL3     
-08A8 DL33       08AA DL4        08AE DL9        08B2 DL91       08CD DL5     
-08D3 DL6        08E2 DL61       08ED DL62       08F1 DL7        08F3 DL8     
-08F8 SDIR99     08F9 ERRNAME    0905 ERRNM1     090A ERRNM2     090F SETL_PRG
-0931 SETL1      094C SETS_PRG   096C SETS1      0987 SDON_PRG   0995 CMT_PRG 
-09A3 ERRC       09AE ERR1       09B7 ERR2       09C0 ERR3       09C9 ERR4    
-09D2 ERR99      09D5 ERRR       09D9 BIOSR      09EF BIOSR1     09F2 BIOSR2  
-09F5 BIOSR3     09F8 MSG1       0A0C MSG2       0A18 MSG3       0A2C MSG4    
-0A40 MSG5       0A4C MSG6       0A59 MSGKEY     0A80 ERR_F0     0A99 ERR_F1  
-0AAA ERR_F2     0ABC ERR_F4     0AC8 ERR_F5     0ADF ERR_F99    0AEF NEWTBL  
+07AC COPY       07F8 BIOSF      0808 ERR02      080B NEWTRN     0813 NEWTRN2 
+081C NEWTRN3    0825 NEWTRN4    082E NEWTRN5    0837 SDIR_PRG   0853 SDIR1   
+0868 SDIR2      0873 SDIR3      0881 DL1        0885 DL2        089B DL3     
+08AC DL33       08AE DL4        08B2 DL9        08B6 DL91       08D2 DL5     
+08D9 DL6        08E8 DL61       08F3 DL62       08F7 DL7        08F9 DL8     
+08FE SDIR99     08FF ERRNAME    090B ERRNM1     0910 ERRNM2     0915 SETL_PRG
+0937 SETL1      0953 SETS_PRG   0973 SETS1      098F SDON_PRG   099F CMT_PRG 
+09AE ERRC       09B9 ERR1       09C2 ERR2       09CB ERR3       09D4 ERR4    
+09DD ERR99      09E0 ERRR       09E4 BIOSR      09FA BIOSR1     09FD BIOSR2  
+0A00 BIOSR3     0A03 MSG1       0A17 MSG3       0A2B MSG4       0A3F MSG5    
+0A4B MSG6       0A58 MSGKEY     0A7F ERR_F0     0A98 ERR_F1     0AA9 ERR_F2  
+0ABB ERR_F4     0AC7 ERR_F5     0ADE ERR_F99    0AEE NEWTBL     
 
-
-Total symbol=80
+Total symbol=79
 Total errors=0

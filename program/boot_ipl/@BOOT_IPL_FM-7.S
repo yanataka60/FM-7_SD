@@ -1,3 +1,5 @@
+;2023.2.11 リロケータブルに修正
+;
 			ORG		$0790
 		
 FILENO		EQU		$00BF	;ファイル番号
@@ -29,7 +31,7 @@ START
 		INC		EXTNUM		;拡張コマンド数+1
 		INC		EXTNUM		;拡張コマンド数+1
 		LDX		EXTTBL		;X <- 旧拡張コマンドTBLアドレス
-		LDU		#NEWTBL		;U <- 新拡張コマンドTBLアドレス
+		LEAU	NEWTBL,PCR	;U <- 新拡張コマンドTBLアドレス
 		STU		EXTTBL		;拡張コマンドTBLポインタ <- 新拡張コマンドTBLアドレス
 *
 COPY	LDA		,X+			;拡張コマンドTBLをコピー
@@ -73,16 +75,16 @@ COPY	LDA		,X+			;拡張コマンドTBLをコピー
 		LDB		#$00
 		STD		,U+
 
-		LDX		#NEWTRN		;追加コマンド判定ルーチンアドレス
+		LEAX	NEWTRN,PCR		;追加コマンド判定ルーチンアドレス
 		STX		EXTTRN		;拡張コマンド判定後のジャンプ先アドレスポインタを追加コマンド判定ルーチンアドレスに書き換え
 
 *BIOS CWRITE CREADフック
-BIOSF	LDX		#BIOSR
+BIOSF	LEAX	BIOSR,PCR
 		STX		BIOSV+1		;($DF) <- BIOSフック用ルーチンアドレス
 
 *SD関連書き換え終了メッセージ
 		CLR		<FILENO			;($00BF) <- 0 画面出力へ設定
-		LDX		#MSG1
+		LEAX	MSG1,PCR
 		JSR		LOUT1			;「FM-7_SD READY OK!」を表示
 
 		RTS						;BASICへ戻る
@@ -185,13 +187,13 @@ DL91	JSR		RCVBYTE		;#LBUFへ文字列格納
 		BNE		DL91
 		LDX		#LBUF
 		JSR		LOUT1
-		LDX		#MSG3
+		LEAX	MSG3,PCR
 		JSR		LOUT1		;SETLしたことを表示
 		JSR		RCVBYTE		;状態取得読み飛ばし
 		JSR		RCVBYTE		;状態取得読み飛ばし
 		RTS
 		
-DL5		LDX		#MSGKEY		;一時停止して一文字入力待ち
+DL5		LEAX	MSGKEY,PCR		;一時停止して一文字入力待ち
 		JSR		LOUT1		;HIT ANT KEY表示
 DL6		JSR		INPUT1
 		CMPA	#$1B
@@ -257,7 +259,7 @@ SETL1
 		BNE		ERRC
 		
 		CLR		<FILENO		;LOAD FILE SET OK!表示
-		LDX		#MSG3
+		LEAX	MSG3,PCR
 		JSR		LOUT1
 		RTS
 
@@ -292,7 +294,7 @@ SETS1
 		BNE		ERRC
 		
 		CLR		<FILENO		;SAVE FILE SET OK!表示
-		LDX		#MSG4
+		LEAX	MSG4,PCR
 		JSR		LOUT1
 		RTS
 
@@ -300,11 +302,11 @@ SETS1
 SDON_PRG
 
 *BIOS CWRITE CREADフック	;CMTコマンドでBIOSフックをCMTに戻したときにSDへ再度変更する
-		LDX		#BIOSR
+		LEAX	BIOSR,PCR
 		STX		BIOSV+1		;($DF) <- BIOSフック用ルーチンアドレス
 
 		CLR		<FILENO		;SD ON OK!表示
-		LDX		#MSG5
+		LEAX	MSG5,PCR
 		JSR		LOUT1
 		RTS
 
@@ -316,7 +318,7 @@ CMT_PRG
 		STX		BIOSV+1		;($DF) <- BIOS通常処理へ
 
 		CLR		<FILENO		;CMT ON OK!表示
-		LDX		#MSG6
+		LEAX	MSG6,PCR
 		JSR		LOUT1
 		RTS
 
@@ -364,9 +366,6 @@ BIOSR2	JMP		WRITE1BYTE
 BIOSR3	JMP		READ1BYTE
 
 MSG1	FCC		/FM-7_SD READY OK!/
-		FCB		$0D,$0A,$00
-
-MSG2	FCC		/SDIR TEST/
 		FCB		$0D,$0A,$00
 
 MSG3	FCC		/LOAD FILE SET OK!/
