@@ -41,7 +41,10 @@ DISKV	EQU		*
 		LDA		PIOA		;FM-7_SD存在チェック
 		LSRA
 		BCS		NONDSK		;C=1なら接続されていないのでNONDSKへ
-
+*
+*最初はここにSDINIT処理を入れようと思っていた名残り
+*今は意味はない、修正するのを忘れていた
+*
 NONDSK	LDX		ROMENT		;インデックスレジスタXにBASICコールドスタートアドレス($FBFE)をセット
 SYSJMP	CLRA				;アキュムレータAクリア
 		JMP		IUSART		;IUSARTへ

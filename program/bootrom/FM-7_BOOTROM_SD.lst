@@ -41,206 +41,209 @@
 00041 FE28 B6FDF0                LDA     PIOA          ;FM-7_SD存在チェック
 00042 FE2B 44                    LSRA
 00043 FE2C 2500                  BCS     NONDSK        ;C=1なら接続されていないのでNONDSKへ
-00044 FE2E                       
-00045 FE2E BEFBFE       NONDSK   LDX     ROMENT        ;インデックスレジスタXにBASICコールドスタートアドレス($FBFE)をセット
-00046 FE31 4F           SYSJMP   CLRA                  ;アキュムレータAクリア
-00047 FE32 7EFEF9                JMP     IUSART        ;IUSARTへ
-00048 FE35                       
-00049 FE35              MOTOR
-00050 FE35 A602                  LDA     2,X           ;BIOS[01] モーター制御
-00051 FE37 81FF                  CMPA    #$FF
-00052 FE39 270D                  BEQ     MOTORON       ;$FFならMOTOR ON、違うならMOTOR OFF
-00053 FE3B                       
-00054 FE3B              MOTOROFF
-00055 FE3B 8659                  LDA     #$59
-00056 FE3D BDFED6                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
-00057 FE40 BDFEC0                JSR     RCVBYTE       ;状態取得(00H=OK)
-00058 FE43 4D                    TSTA
-00059 FE44 262C                  BNE     ERR
-00060 FE46 201D                  BRA     RET1
-00061 FE48                       
-00062 FE48              MOTORON
-00063 FE48 8658                  LDA     #$58
-00064 FE4A BDFED6                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
-00065 FE4D BDFEC0                JSR     RCVBYTE       ;状態取得(00H=OK)
-00066 FE50 4D                    TSTA
-00067 FE51 261F                  BNE     ERR
-00068 FE53 2010                  BRA     RET1
-00069 FE55                       
-00070                   *WRITE1BYTE					;BIOS[02] SD-CARDへ1Byte書き込み
-00071 FE55              WRITE1BYTE
-00072 FE55 8657                  LDA     #$57
-00073 FE57 BDFED6                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
-00074 FE5A BDFEC0                JSR     RCVBYTE       ;状態取得(00H=OK)
-00075 FE5D 4D                    TSTA
-00076 FE5E 2612                  BNE     ERR
-00077 FE60                       
-00078 FE60 A602                  LDA     2,X
-00079 FE62 BDFED6                JSR     SNDBYTE       ;1Byte送信
-00080 FE65                       
-00081 FE65 357F         RET1     PULS    CC,D,DP,X,Y,U ;BIOS正常終了
-00082 FE67 6F01                  CLR     1,X
-00083 FE69 39                    RTS
-00084 FE6A                       
-00085 FE6A 0FBF         ERR11    CLR     <$00BF        ;BIOS異常終了
-00086 FE6C 8EFE7B                LDX     #ERR_F5
-00087 FE6F BDD90F                JSR     LOUT1         ;MOTOR ON、READ1BYTEでFILEOPENされていなかったときにメッセージを表示
-00088 FE72                       
-00089 FE72 357F         ERR      PULS    CC,D,DP,X,Y,U
-00090 FE74 8652                  LDA     #$52
-00091 FE76 A701                  STA     1,X           ;エラーコードとキャリーをセットして終了、ただしF-BASIC側ではエラー処理なし
-00092 FE78 1A01                  ORCC    #$01
-00093 FE7A 39                    RTS
-00094 FE7B                       
-00095 FE7B 524541442046 ERR_F5   FCC     /READ FILE IS NOT SET or FILE END/ 
+00044                   *
+00045                   *最初はここにSDINIT処理を入れようと思っていた名残り
+00046                   *今は意味はない、修正するのを忘れていた
+00047                   *
+00048 FE2E BEFBFE       NONDSK   LDX     ROMENT        ;インデックスレジスタXにBASICコールドスタートアドレス($FBFE)をセット
+00049 FE31 4F           SYSJMP   CLRA                  ;アキュムレータAクリア
+00050 FE32 7EFEF9                JMP     IUSART        ;IUSARTへ
+00051 FE35                       
+00052 FE35              MOTOR
+00053 FE35 A602                  LDA     2,X           ;BIOS[01] モーター制御
+00054 FE37 81FF                  CMPA    #$FF
+00055 FE39 270D                  BEQ     MOTORON       ;$FFならMOTOR ON、違うならMOTOR OFF
+00056 FE3B                       
+00057 FE3B              MOTOROFF
+00058 FE3B 8659                  LDA     #$59
+00059 FE3D BDFED6                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00060 FE40 BDFEC0                JSR     RCVBYTE       ;状態取得(00H=OK)
+00061 FE43 4D                    TSTA
+00062 FE44 262C                  BNE     ERR
+00063 FE46 201D                  BRA     RET1
+00064 FE48                       
+00065 FE48              MOTORON
+00066 FE48 8658                  LDA     #$58
+00067 FE4A BDFED6                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00068 FE4D BDFEC0                JSR     RCVBYTE       ;状態取得(00H=OK)
+00069 FE50 4D                    TSTA
+00070 FE51 261F                  BNE     ERR
+00071 FE53 2010                  BRA     RET1
+00072 FE55                       
+00073                   *WRITE1BYTE					;BIOS[02] SD-CARDへ1Byte書き込み
+00074 FE55              WRITE1BYTE
+00075 FE55 8657                  LDA     #$57
+00076 FE57 BDFED6                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00077 FE5A BDFEC0                JSR     RCVBYTE       ;状態取得(00H=OK)
+00078 FE5D 4D                    TSTA
+00079 FE5E 2612                  BNE     ERR
+00080 FE60                       
+00081 FE60 A602                  LDA     2,X
+00082 FE62 BDFED6                JSR     SNDBYTE       ;1Byte送信
+00083 FE65                       
+00084 FE65 357F         RET1     PULS    CC,D,DP,X,Y,U ;BIOS正常終了
+00085 FE67 6F01                  CLR     1,X
+00086 FE69 39                    RTS
+00087 FE6A                       
+00088 FE6A 0FBF         ERR11    CLR     <$00BF        ;BIOS異常終了
+00089 FE6C 8EFE7B                LDX     #ERR_F5
+00090 FE6F BDD90F                JSR     LOUT1         ;MOTOR ON、READ1BYTEでFILEOPENされていなかったときにメッセージを表示
+00091 FE72                       
+00092 FE72 357F         ERR      PULS    CC,D,DP,X,Y,U
+00093 FE74 8652                  LDA     #$52
+00094 FE76 A701                  STA     1,X           ;エラーコードとキャリーをセットして終了、ただしF-BASIC側ではエラー処理なし
+00095 FE78 1A01                  ORCC    #$01
+00096 FE7A 39                    RTS
+00097 FE7B                       
+00098 FE7B 524541442046 ERR_F5   FCC     /READ FILE IS NOT SET or FILE END/ 
       FE81 494C45204953
       FE87 204E4F542053
       FE8D 4554206F7220
       FE93 46494C452045
       FE99 4E44        
-00096 FE9B 0D0A00                FCB     $0D,$0A,$00
-00097 FE9E                       
-00098                   *READ1BYTE					;BIOS[03] SD-CARDから1Byte読み込み
-00099 FE9E              READ1BYTE
-00100 FE9E 8656                  LDA     #$56
-00101 FEA0 BDFED6                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
-00102 FEA3 BDFEC0                JSR     RCVBYTE       ;状態取得(00H=OK)
-00103 FEA6 4D                    TSTA
-00104 FEA7 26C1                  BNE     ERR11
-00105 FEA9                       
-00106 FEA9 BDFEC0                JSR     RCVBYTE
-00107 FEAC A702                  STA     2,X           ;受信した1Byteをセットして終了
-00108 FEAE 20B5                  BRA     RET1
-00109 FEB0                       
-00110                   **** BUSYをCHECK(1) ****
-00111                   ;PORTC BIT7が1になるまでLOOP
-00112 FEB0 B6FDF2       F1CHK    LDA     PIOC
-00113 FEB3 8480                  ANDA    #$80          ;PORTC BIT7 = 1?
-00114 FEB5 27F9                  BEQ     F1CHK
-00115 FEB7 39                    RTS
-00116 FEB8                       
-00117                   **** BUSYをCHECK(0) ****
-00118                   ;PORTC BIT7が0になるまでLOOP
-00119 FEB8 B6FDF2       F2CHK    LDA     PIOC
-00120 FEBB 8480                  ANDA    #$80          ;PORTC BIT7 = 0?
-00121 FEBD 26F9                  BNE     F2CHK
-00122 FEBF 39                    RTS
-00123 FEC0                       
-00124                   **** 1BYTE受信****
-00125                   *受信データをアキュムレータAにセットしてリターン
-00126 FEC0 8DEE         RCVBYTE  BSR     F1CHK         ;PORTC BIT7が1になるまでLOOP
-00127 FEC2 B6FDF1                LDA     PIOB          ;PORTB -> A
-00128 FEC5 3402                  PSHS    A
-00129 FEC7 8605                  LDA     #$05
-00130 FEC9 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 1
-00131 FECC 8DEA                  BSR     F2CHK         ;PORTC BIT7が0になるまでLOOP
-00132 FECE 8604                  LDA     #$04
-00133 FED0 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 0
-00134 FED3 3502                  PULS    A
-00135 FED5 39                    RTS
-00136 FED6                       
-00137                   **** 1BYTE送信 ****
-00138                   *アキュムレータAの内容をPORTA下位4BITに4BITずつ送信
-00139 FED6              SNDBYTE
-00140 FED6 3402                  PSHS    A
-00141 FED8 44                    LSRA
-00142 FED9 44                    LSRA
-00143 FEDA 44                    LSRA
-00144 FEDB 44                    LSRA
-00145 FEDC 840F                  ANDA    #$0F
-00146 FEDE 8D07                  BSR     SND4BIT
-00147 FEE0 3502                  PULS    A
-00148 FEE2 840F                  ANDA    #$0F
-00149 FEE4 8D01                  BSR     SND4BIT
-00150 FEE6 39                    RTS
-00151 FEE7                       
-00152                   **** 4BIT送信 ****
-00153                   *アキュムレータA下位4ビットを送信する
-00154 FEE7              SND4BIT
-00155 FEE7 B7FDF0                STA     PIOA
-00156 FEEA 8605                  LDA     #$05
-00157 FEEC B7FDF3                STA     PIOR          ;PORTC BIT2 <- 1
-00158 FEEF 8DBF                  BSR     F1CHK         ;PORTC BIT7が1になるまでLOOP
-00159 FEF1 8604                  LDA     #$04
-00160 FEF3 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 0
-00161 FEF6 8DC0                  BSR     F2CHK
-00162 FEF8 39                    RTS
-00163 FEF9                       
-00164                   *
-00165                   *	USART	Initialize	and
-00166                   *
-00167      FEF9         IUSART   EQU     *             ;USART(8251)イニシャライズルーチン
-00168 FEF9 1F8B                  TFR     A,DP          ;DP <- $00
-00169 FEFB CEFD06                LDU     #RS232D
-00170 FEFE 8D0E                  BSR     I8251
-00171 FF00 CEFD24                LDU     #RS232E
-00172 FF03 8604                  LDA     #4
-00173 FF05 8D07         INITLP   BSR     I8251
-00174 FF07 3342                  LEAU    2,U
-00175 FF09 4A                    DECA
-00176 FF0A 26F9                  BNE     INITLP
-00177 FF0C 6E84                  JMP     ,X
-00178                   *
-00179 FF0E 6F41         I8251    CLR     1,U
-00180 FF10 6F41                  CLR     1,U
-00181 FF12 6F41                  CLR     1,U
-00182 FF14 C640                  LDB     #$40
-00183 FF16 E741                  STB     1,U
-00184 FF18 39                    RTS
-00185 FF19                       
-00186 FF19 9E33         SDINIT   LDX     TEXTOP        ;X <- @BOOT_IPL_FM-7.binの書込先セット
-00187 FF1B 8D34                  BSR     PIOINI        ;PIO初期化
-00188 FF1D 8650                  LDA     #$50          ;ArduinoへSD-CARDから@BOOT_IPL_FM-7.binを読み出して送信するよう指示
-00189 FF1F 8DB5                  BSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
-00190 FF21 8D9D                  BSR     RCVBYTE       ;状態取得(00H=OK)
-00191 FF23 4D                    TSTA
-00192 FF24 2621                  BNE     INI1          ;異常ならそのまま終了
-00193 FF26                       
-00194 FF26 8D98                  BSR     RCVBYTE       ;状態取得(00H=OK)
-00195 FF28 4D                    TSTA
-00196 FF29 261C                  BNE     INI1          ;異常ならそのまま終了
-00197 FF2B                       
-00198 FF2B 8D93                  BSR     RCVBYTE       ;読み込み上位Byte数受信
-00199 FF2D 1E89                  EXG     A,B
-00200 FF2F 8D8F                  BSR     RCVBYTE       ;読み込み下位Byte数受信
-00201 FF31 1E02                  EXG     D,Y           ;読み込みByte数をループ回数としてセット
-00202 FF33                       
-00203 FF33 8D8B         LOP1     BSR     RCVBYTE       ;1Byte受信
-00204 FF35 A784                  STA     0,X           ;(X) <- A
-00205 FF37 3001                  LEAX    1,X           ;X <- X+1
-00206 FF39 313F                  LEAY    -1,Y          ;Y <- Y-1
-00207 FF3B 26F6                  BNE     LOP1
-00208 FF3D 3001                  LEAX    1,X           ;X <- X+1
-00209 FF3F 3410                  PSHS    X
-00210 FF41 9E33                  LDX     TEXTOP
-00211 FF43 AD84                  JSR     ,X
-00212 FF45 3510                  PULS    X
-00213 FF47                       
-00214 FF47 9F33         INI1     STX     TEXTOP        ;テキストエリア開始位置を再セット
-00215 FF49 6F80                  CLR     ,X+
-00216 FF4B BD8F39                JSR     NEW2
-00217 FF4E 7E8E72                JMP     READY
-00218 FF51                       
-00219                   **** 8255初期化 ****
-00220                   *PORTC下位BITをOUTPUT、上位BITをINPUT、PORTBをINPUT、PORTAをOUTPUT
-00221 FF51 868A         PIOINI   LDA     #$8A
-00222 FF53 B7FDF3                STA     PIOR          ;PIOR <- $8A
-00223 FF56 4F                    CLRA
-00224 FF57 B7FDF0                STA     PIOA          ;PIOA <- $00
-00225 FF5A B7FDF2                STA     PIOC          ;PIOC <- $00
-00226 FF5D 39                    RTS
-00227 FF5E                       
-00228 FFE0                       ORG     $FFE0
-00229 FFE0                       
-00230 FFE0 FFFFFFFFFFFF          FCB     $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+00099 FE9B 0D0A00                FCB     $0D,$0A,$00
+00100 FE9E                       
+00101                   *READ1BYTE					;BIOS[03] SD-CARDから1Byte読み込み
+00102 FE9E              READ1BYTE
+00103 FE9E 8656                  LDA     #$56
+00104 FEA0 BDFED6                JSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00105 FEA3 BDFEC0                JSR     RCVBYTE       ;状態取得(00H=OK)
+00106 FEA6 4D                    TSTA
+00107 FEA7 26C1                  BNE     ERR11
+00108 FEA9                       
+00109 FEA9 BDFEC0                JSR     RCVBYTE
+00110 FEAC A702                  STA     2,X           ;受信した1Byteをセットして終了
+00111 FEAE 20B5                  BRA     RET1
+00112 FEB0                       
+00113                   **** BUSYをCHECK(1) ****
+00114                   ;PORTC BIT7が1になるまでLOOP
+00115 FEB0 B6FDF2       F1CHK    LDA     PIOC
+00116 FEB3 8480                  ANDA    #$80          ;PORTC BIT7 = 1?
+00117 FEB5 27F9                  BEQ     F1CHK
+00118 FEB7 39                    RTS
+00119 FEB8                       
+00120                   **** BUSYをCHECK(0) ****
+00121                   ;PORTC BIT7が0になるまでLOOP
+00122 FEB8 B6FDF2       F2CHK    LDA     PIOC
+00123 FEBB 8480                  ANDA    #$80          ;PORTC BIT7 = 0?
+00124 FEBD 26F9                  BNE     F2CHK
+00125 FEBF 39                    RTS
+00126 FEC0                       
+00127                   **** 1BYTE受信****
+00128                   *受信データをアキュムレータAにセットしてリターン
+00129 FEC0 8DEE         RCVBYTE  BSR     F1CHK         ;PORTC BIT7が1になるまでLOOP
+00130 FEC2 B6FDF1                LDA     PIOB          ;PORTB -> A
+00131 FEC5 3402                  PSHS    A
+00132 FEC7 8605                  LDA     #$05
+00133 FEC9 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 1
+00134 FECC 8DEA                  BSR     F2CHK         ;PORTC BIT7が0になるまでLOOP
+00135 FECE 8604                  LDA     #$04
+00136 FED0 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 0
+00137 FED3 3502                  PULS    A
+00138 FED5 39                    RTS
+00139 FED6                       
+00140                   **** 1BYTE送信 ****
+00141                   *アキュムレータAの内容をPORTA下位4BITに4BITずつ送信
+00142 FED6              SNDBYTE
+00143 FED6 3402                  PSHS    A
+00144 FED8 44                    LSRA
+00145 FED9 44                    LSRA
+00146 FEDA 44                    LSRA
+00147 FEDB 44                    LSRA
+00148 FEDC 840F                  ANDA    #$0F
+00149 FEDE 8D07                  BSR     SND4BIT
+00150 FEE0 3502                  PULS    A
+00151 FEE2 840F                  ANDA    #$0F
+00152 FEE4 8D01                  BSR     SND4BIT
+00153 FEE6 39                    RTS
+00154 FEE7                       
+00155                   **** 4BIT送信 ****
+00156                   *アキュムレータA下位4ビットを送信する
+00157 FEE7              SND4BIT
+00158 FEE7 B7FDF0                STA     PIOA
+00159 FEEA 8605                  LDA     #$05
+00160 FEEC B7FDF3                STA     PIOR          ;PORTC BIT2 <- 1
+00161 FEEF 8DBF                  BSR     F1CHK         ;PORTC BIT7が1になるまでLOOP
+00162 FEF1 8604                  LDA     #$04
+00163 FEF3 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 0
+00164 FEF6 8DC0                  BSR     F2CHK
+00165 FEF8 39                    RTS
+00166 FEF9                       
+00167                   *
+00168                   *	USART	Initialize	and
+00169                   *
+00170      FEF9         IUSART   EQU     *             ;USART(8251)イニシャライズルーチン
+00171 FEF9 1F8B                  TFR     A,DP          ;DP <- $00
+00172 FEFB CEFD06                LDU     #RS232D
+00173 FEFE 8D0E                  BSR     I8251
+00174 FF00 CEFD24                LDU     #RS232E
+00175 FF03 8604                  LDA     #4
+00176 FF05 8D07         INITLP   BSR     I8251
+00177 FF07 3342                  LEAU    2,U
+00178 FF09 4A                    DECA
+00179 FF0A 26F9                  BNE     INITLP
+00180 FF0C 6E84                  JMP     ,X
+00181                   *
+00182 FF0E 6F41         I8251    CLR     1,U
+00183 FF10 6F41                  CLR     1,U
+00184 FF12 6F41                  CLR     1,U
+00185 FF14 C640                  LDB     #$40
+00186 FF16 E741                  STB     1,U
+00187 FF18 39                    RTS
+00188 FF19                       
+00189 FF19 9E33         SDINIT   LDX     TEXTOP        ;X <- @BOOT_IPL_FM-7.binの書込先セット
+00190 FF1B 8D34                  BSR     PIOINI        ;PIO初期化
+00191 FF1D 8650                  LDA     #$50          ;ArduinoへSD-CARDから@BOOT_IPL_FM-7.binを読み出して送信するよう指示
+00192 FF1F 8DB5                  BSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00193 FF21 8D9D                  BSR     RCVBYTE       ;状態取得(00H=OK)
+00194 FF23 4D                    TSTA
+00195 FF24 2621                  BNE     INI1          ;異常ならそのまま終了
+00196 FF26                       
+00197 FF26 8D98                  BSR     RCVBYTE       ;状態取得(00H=OK)
+00198 FF28 4D                    TSTA
+00199 FF29 261C                  BNE     INI1          ;異常ならそのまま終了
+00200 FF2B                       
+00201 FF2B 8D93                  BSR     RCVBYTE       ;読み込み上位Byte数受信
+00202 FF2D 1E89                  EXG     A,B
+00203 FF2F 8D8F                  BSR     RCVBYTE       ;読み込み下位Byte数受信
+00204 FF31 1E02                  EXG     D,Y           ;読み込みByte数をループ回数としてセット
+00205 FF33                       
+00206 FF33 8D8B         LOP1     BSR     RCVBYTE       ;1Byte受信
+00207 FF35 A784                  STA     0,X           ;(X) <- A
+00208 FF37 3001                  LEAX    1,X           ;X <- X+1
+00209 FF39 313F                  LEAY    -1,Y          ;Y <- Y-1
+00210 FF3B 26F6                  BNE     LOP1
+00211 FF3D 3001                  LEAX    1,X           ;X <- X+1
+00212 FF3F 3410                  PSHS    X
+00213 FF41 9E33                  LDX     TEXTOP
+00214 FF43 AD84                  JSR     ,X
+00215 FF45 3510                  PULS    X
+00216 FF47                       
+00217 FF47 9F33         INI1     STX     TEXTOP        ;テキストエリア開始位置を再セット
+00218 FF49 6F80                  CLR     ,X+
+00219 FF4B BD8F39                JSR     NEW2
+00220 FF4E 7E8E72                JMP     READY
+00221 FF51                       
+00222                   **** 8255初期化 ****
+00223                   *PORTC下位BITをOUTPUT、上位BITをINPUT、PORTBをINPUT、PORTAをOUTPUT
+00224 FF51 868A         PIOINI   LDA     #$8A
+00225 FF53 B7FDF3                STA     PIOR          ;PIOR <- $8A
+00226 FF56 4F                    CLRA
+00227 FF57 B7FDF0                STA     PIOA          ;PIOA <- $00
+00228 FF5A B7FDF2                STA     PIOC          ;PIOC <- $00
+00229 FF5D 39                    RTS
+00230 FF5E                       
+00231 FFE0                       ORG     $FFE0
+00232 FFE0                       
+00233 FFE0 FFFFFFFFFFFF          FCB     $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
       FFE6 FFFFFFFFFFFF
       FFEC FFFFFFFF    
-00231 FFF0 FFFFFFFFFFFF          FCB     $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+00234 FFF0 FFFFFFFFFFFF          FCB     $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
       FFF6 FFFFFFFFFFFF
       FFFC FFFF        
-00232 FFFE FE00                  FCB     $FE,$00
-00233 0000                       
-00234 0000                       END                   BOTENT
+00235 FFFE FE00                  FCB     $FE,$00
+00236 0000                       
+00237 0000                       END                   BOTENT
 
 SYMBOL TABLE
 
