@@ -158,6 +158,27 @@
 
 　6　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。BASICのフリーエリアは30530Byte($0790～)から29583Byte($0B35～)に減少します。
 
+## 起動手順(DISK-BASIC)
+　FM-7_SDとFDDを両方同時に接続できる環境にあればFDからFM-7_SD初期設定プログラムを走らせることでBOOT-ROMの差し替えを行わずにSD-CARDからLOAD、SAVE出来るようになります。
+### メリット
+　BOOT-ROMの差し替えが必要ない。
+
+　SD <-> FDでプログラムのコピーが容易。
+### デメリット
+　25919Byte($0B5B～)から24797Byte($0FBD～)にフリーエリアが減少。
+
+　SD-CARDにアクセスするには必ずファイルディスクリプタ「CAS0:」が必要となる。
+
+　1　DISKBASICフォルダのSDINIT_FM7.D77ディスクイメージをFDに書き込むか、SDINIT_FM7.binをFDに書き込んでください。
+
+　2　電源を入れ、DISK-BASICを起動します。
+
+　3　作成したFDの中にある「SDINIT」をロードし、実行します。
+
+　　　LOADM"SDINIT"してからEXEC &H6000又はLOADM"SDINIT",,R
+
+　4　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。
+
 ## 使い方
 　BASICから以下のコマンドが使えます。
 ### CMT[CR]
