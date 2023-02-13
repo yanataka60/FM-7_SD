@@ -176,6 +176,8 @@
 
 　4　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。
 
+　5　LOADM"SDINIT",,RをSTARTUPとして保存し、AUTOUTYで自動実行を設定すれば手間が省けます。
+
 #### メリット
 　BOOT-ROMの差し替えが必要ない。
 
