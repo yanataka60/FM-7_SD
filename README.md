@@ -181,7 +181,7 @@
 ## 起動手順(BOOT-ROMを差し替えずにCMTから毎回SDINIT_FM7をロードする)
 　電源投入時及びRESET時に毎回CMTからSDINIT_FM7をロード、実行する気があればBOOT-ROMの差し替えを行わずにSD-CARDからLOAD、SAVE出来るようになります。
 
-　1　LOADM"SDINIT",,Rと入力、実行して次に掲げる方法などで再生したCMTLOADフォルダのSDINIT_FM7.WAVをCMTケーブルで接続して読み込みます。
+　1　LOADM"SDINIT",,Rと入力、実行して次に掲げる方法などで再生したCMTLOADフォルダのSDINIT_FM7.WAVをCMTケーブルで接続して読み込みます。(ロード時間約15秒)
 
 　　1)WindowsマシンでSDINIT_FM7.WAVを再生する。
 
