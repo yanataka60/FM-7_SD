@@ -178,14 +178,26 @@
 
 　5　LOADM"SDINIT",,RをSTARTUPとして保存し、AUTOUTYで自動実行を設定すれば手間が省けます。
 
+## 起動手順(BOOT-ROMを差し替えずにCMTから毎回SDINIT_FM7をロードする)
+　電源投入時及びRESET時に毎回CMTからSDINIT_FM7をロード、実行する気があればBOOT-ROMの差し替えを行わずにSD-CARDからLOAD、SAVE出来るようになります。
+
+　1　LOADM"SDINIT",,Rと入力、実行して次に掲げる方法などで再生したCMTLOADフォルダのSDINIT_FM7.WAVをCMTケーブルで接続して読み込みます。
+
+　　1)WindowsマシンでSDINIT_FM7.WAVを再生する。
+
+　　2)SDINIT_FM7.WAVをカセットに保存してカセットテープレコーダーで再生する。
+
+　　3)携帯音楽プレーヤーでSDINIT_FM7.WAVを再生する。
+
+　2　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。
+
 #### メリット
 　BOOT-ROMの差し替えが必要ない。
 
-　SD <-> FDでプログラムのコピーが容易。
 #### デメリット
-　起動時のDISK-BASICフリーエリアから1136Byte程減少。
+　起動時のROM-BASICフリーエリアから1136Byte程減少。
 
-　SD-CARDにアクセスするには必ずファイルディスクリプタ「CAS0:」が必要となる。
+　電源投入時及びRESET時に毎回CMTから読み込み実行が必要となる。
 
 ## 使い方
 　BASICから以下のコマンドが使えます。
@@ -302,3 +314,5 @@ F-BASICのSAVEMコマンドと同じ使い方です。
 2023.2.13 FDからFM-7_SDの初期設定を行うプログラムを追加
 
 　　　　　FM-77、FM-77AVにおける動作状況を追記しました。
+
+2023.2.15 CMTから読み込む方法も追加しました。
