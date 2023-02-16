@@ -79,19 +79,17 @@
 ## BOOT-ROMの差し替え
 　FM-7_SDを使うにはBOOT-ROMの差し替えが必須になります。
 
-　programフォルダ内bootromフォルダにある「FM-7_BOOTROM_SD.bin」を使いますが、次の３つの運用方法によりROMの差し替え方法が変わります。
+　programフォルダ内bootromフォルダにある「FM-7_BOOTROM_SD.bin」を使いますが、次の２つの運用方法によりROMの差し替え方法が変わります。
+
+#### 2023.2.17修正 DOS-MODEからの起動は出来ませんでした。運用方法は２通りとなります。
 
 　1　FM-7_SDとCMTだけが使えればよい。(DISK-BASIC、DOS-MODEは使わない)
 
-　　　元のBOOT-ROMを読み出す必要はありません。FM-7_BOOTROM_SD.binをROMライター(TL866II Plus等)を使ってROM 2716のアドレス($0000～$01FF、$0400～$05FF)に書き込んでBOOT-ROMのICソケットに装着します。
+　　　元のBOOT-ROMを読み出す必要はありません。FM-7_BOOTROM_SD.binをROMライター(TL866II Plus等)を使ってROM 2716のアドレス$0000～$01FFに書き込んでBOOT-ROMのICソケットに装着します。
 
-　2　FM-7_SDとCMTに加えてDISK-BASICは使いたい。(DOS-MODEは使わない)
+　2　FM-7_SDとCMTに加えてDISK-BASICは使いたい又は、FM-7_SD、CMT、DISK-BASIC、DOS-MODEのすべてを使いたい。
 
-　　　元のBOOT-ROMの内容の後半DOS-MODE用の領域($0400～$05FF)をFM-7_BOOTROM_SD.binに差し替えたバイナリをROMライター(TL866II Plus等)を使ってROM 2716に書き込んでBOOT-ROMのICソケットに装着します。
-
-　3　FM-7_SD、CMT、DISK-BASIC、DOS-MODEのすべてを使いたい。
-
-　　　ROM 2732の前半に元のBOOT-ROMの内容、後半($0800～$09FF、$0C00～$0DFFのいずれか)にFM-7_BOOTROM_SD.binとしたバイナリをROMライター(TL866II Plus等)を使って書き込みます。2732変換基板又は24PinICソケットの21Pinを曲げてスイッチで5VとGNDを切り替えられるようにしてBOOT-ROMのICソケットに装着します。
+　　　ROM 2732の前半に元のBOOT-ROMの内容、後半の$0800～$09FFにFM-7_BOOTROM_SD.binとしたバイナリをROMライター(TL866II Plus等)を使って書き込みます。2732変換基板又は24PinICソケットの21Pinを曲げてスイッチで5VとGNDを切り替えられるようにしてBOOT-ROMのICソケットに装着します。
 
 ### FM-7 BOOT-ROM
 ![boot-rom1](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/FM-7_BOOT-ROM_1.JPG)
@@ -318,3 +316,5 @@ F-BASICのSAVEMコマンドと同じ使い方です。
 　　　　　FM-77、FM-77AVにおける動作状況を追記しました。
 
 2023.2.15 CMTから読み込む方法も追加しました。
+
+2023.2.17 DOS-MODEからの起動は出来ませんでした。BOOT-ROMの差し替え方は２通りとなります。
