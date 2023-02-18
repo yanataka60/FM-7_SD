@@ -124,6 +124,17 @@
 
 ![connect2](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/CONNECT_2.JPG)
 
+　50Pinフラットケーブルは、コネクタのボッチとケーブルの返しが両方上になる側のコネクタを本体に嵌めます。
+
+![Cable3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/Cable3.JPG)
+
+![Cable3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/Cable1.JPG)
+
+　逆側のコネクタを本体に嵌めると一見嵌っているように見えてもケーブルの返しが基板に当たっていてちゃんと嵌っておらず接触不良を起こしていることがあります。
+
+#### 悪い例です
+![Cable3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/Cable2.JPG)
+
 ## SD-CARD
 　FAT16又はFAT32が認識できます。
 
@@ -318,3 +329,5 @@ F-BASICのSAVEMコマンドと同じ使い方です。
 2023.2.15 CMTから読み込む方法も追加しました。
 
 2023.2.17 DOS-MODEからの起動は出来ませんでした。BOOT-ROMの差し替え方は２通りとなります。
+
+2023.2.18 50Pinフラットケーブルの嵌め方を追記しました。
