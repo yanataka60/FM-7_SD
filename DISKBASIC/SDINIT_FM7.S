@@ -37,7 +37,8 @@ TRNS1	LDA		,X+
 		LEAU	1,U
 		PSHS	U
 
-		BSR		START			;SDアクセス初期設定
+		LDX		TEXTOP
+		JSR		,X				;SDアクセス初期設定
 
 		PULS	X
 		
