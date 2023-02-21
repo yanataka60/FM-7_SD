@@ -28,7 +28,7 @@
 |Rev3.0|FM-8、FM-7、FM-NEW7|フラットケーブルコネクタ 50ピン|同左||
 |Rev3.0|FM-77|フラットケーブルコネクタ 50ピン|アンフェノール フルピッチ50Pin|ケーブルの自作が必要|
 
-#### FM-8、FM-7、FM-77で使うときはBOOT-ROMの差替え有無を選択します。FM-77以降はFDD標準搭載なのでFDからFM-7_SD初期設定プログラムを走らせるものとしています。
+### FM-8、FM-7、FM-77で使うときはBOOT-ROMの差替え有無を選択します。FM-77以降はFDD標準搭載なのでFDからFM-7_SD初期設定プログラムを走らせるものとしています。
 
 　　1)BOOT-ROMを差し替える
 
@@ -157,7 +157,7 @@
 
 ![MicroSD Card Adapter3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/MicroSD%20Card%20Adapter3.JPG)
 
-## BOOT-ROMの差し替え
+## BOOT-ROMの差し替えを選択した場合
 　FM-8、FM-7、FM-NEW7でBOOT-ROMの差し替えを選択した場合には、programフォルダ内bootromフォルダにある「FM-7_BOOTROM_SD.bin」を使いますが、Disk-Basicを使うか、使わないかでROMの差し替え方法が変わります。
 
 　FM-8は「FM-7_BOOTROM_SD.bin」をbootrom_FM8フォルダにある「FM-8_BOOTROM_SD.bin」に読み替えてください。
