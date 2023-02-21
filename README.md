@@ -1,8 +1,8 @@
 # FM-7にSD-CARDからロード、セーブ機能
 
 ![TITLE](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE.JPG)
-![TITLE2](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE2.JPG)
-![TITLE3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE3.JPG)
+![TITLE2](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE2.jpg)
+![TITLE3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE3.jpg)
 
 　FM-8、FM-7、FM-77シリーズでSD-CARDからロード、セーブ機能を実現するものです。
 
