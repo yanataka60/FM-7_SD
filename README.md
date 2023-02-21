@@ -1,19 +1,40 @@
 # FM-7にSD-CARDからロード、セーブ機能
 
 ![TITLE](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE.JPG)
+![TITLE2](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE2.JPG)
+![TITLE3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/TITLE3.JPG)
 
-　FM-7でSD-CARDからロード、セーブ機能を実現するものです。
+　FM-8、FM-7、FM-77シリーズでSD-CARDからロード、セーブ機能を実現するものです。
 
-　対応機種はFM-7、FM-NEW7です。(以下FM-7と記述します。)
+　対応できるBASICのバージョンは、FM-8はF-BASICV1.0(ROM-BASIC、DISK-VERSIONとも)、FM-7以降はF-BASICV3.0(ROM-BASIC、DISK-VERSIONとも)です。
 
-##### 2023.2.13追記　FM-77、FM-77AVにおいてF-BASIC DISK-BASIC V3.0環境下でSDINIT(FM-7_SD初期設定プログラム)を走らせることでFM-7_SDが正常動作することを確認しました。
-##### ただし、FM-7_SDの50PinコネクタからFM-77はアンフェノール フルピッチ50Pin、FM-77AVはアンフェノール フルピッチ36Pinへの変換が必要です。
+　対応機種はFM-8からFM-77AV40SXまで全てのFMシリーズとなりますが、基板のRevにより対応範囲が異なります。
 
-　FM-7本体内のBOOT-ROMの差し替えが必須となります。
+　Rev1.1とRev2.0の違いはコネクタのみです。
 
-　ただし、FM-7_SD初期設定プログラムを電源投入時、RESET時に毎回CMTから読み込む(約15秒)のであればBOOT-ROMの差し替えは必要ありません。(後述「起動手順」参照)
+　Rev1.1はFM-7、FM-NEW7なら50Pinフラットケーブルで接続できますが、FM-77以降は外部拡張インタフェースの仕様が変更となっており、アンフェノール フルピッチへ変換するケーブルの自作が必要です。
 
-　また、FM-7_SDとFDDを両方同時に接続できる環境にあればFDからFM-7_SD初期設定プログラムを走らせることでBOOT-ROMの差し替えを行わず使うこともできますが、フリーエリアがさらに減少する、SD-CARDアクセスには「CAS0:」をつける必要があるなどデメリットもあります。
+　Rev2.0は32Pin拡張スロット仕様でFM-7以降全ての機種に接続できますが、純正の32Pinコネクタ(FCN-365P032-AU)の製造が終了してしまったため入手困難です。手持ちにある方は利用できますが、無い方はOMRON XC5A-3282-1が代替品として使えますが、加工が必要です。
+
+　FM-8に繋げることが出来るのはRev3.0のみです。また、Rev3.0はFM-8、FM-7、FM-NEW7なら50Pinフラットケーブルで接続できますが、FM-77は外部拡張インタフェースの仕様が変更となっており、アンフェノール フルピッチへ変換するケーブルの自作が必要です。
+
+|Revsion|対応機種|基板側コネクタ|本体側コネクタ|備考|
+| ------------ | ------------ | ------------ | ------------ |
+|Rev1.1|FM-7、FM-NEW7|フラットケーブルコネクタ 50ピン|同左||
+|Rev1.1|FM-77|フラットケーブルコネクタ 50ピン|アンフェノール フルピッチ50Pin|ケーブルの自作が必要|
+|Rev1.1|FM-77AV|フラットケーブルコネクタ 50ピン|アンフェノール フルピッチ36Pin|ケーブルの自作が必要|
+|Rev1.1|FM-77AV20以降|フラットケーブルコネクタ 50ピン|アンフェノール フルピッチ50Pin|ケーブルの自作が必要|
+|Rev2.0|FM-7以降のすべて|32Pin拡張スロット||コネクタの加工が必要|
+|Rev3.0|FM-8、FM-7、FM-NEW7|フラットケーブルコネクタ 50ピン|同左||
+|Rev3.0|FM-77|フラットケーブルコネクタ 50ピン|アンフェノール フルピッチ50Pin|ケーブルの自作が必要|
+
+　FM-8、FM-7、FM-77で使うときはBOOT-ROMの差替え有無を選択します。FM-77以降はFDD標準搭載なのでFDからFM-7_SD初期設定プログラムを走らせるものとしています。
+
+　　1)BOOT-ROMを差し替える
+
+　　2)BOOT-ROMを差し替えない。電源投入時又はRESET時に毎回CMTからFM-7_SD初期設定プログラムを読み込む(約15秒)
+
+　　3)BOOT-ROMを差し替えない。電源投入時又はRESET時に毎回FDからFM-7_SD初期設定プログラムを走らせる。
 
 　対応しているCMT形式は、FM-7がCMTで読み書きするベタCMT形式(拡張子bimとしています)です。T77からbimへの変換、bimからT77への変換にはツールを使って変換します。
 
@@ -31,20 +52,35 @@
 　市販ソフトがLOAD出来ればラッキーくらいに思って雑誌打ち込み系のLOADに活用してください。
 
 ## 回路図
-### FM-7_SD基板
-　KiCadフォルダ内のFM-7_SD.pdfを参照してください。
+### FM-7_SD Rev1.1基板
+　KiCadフォルダ内Rev1.1フォルダのFM-7_SD_11.pdfを参照してください。
 
-[回路図](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/FM-7_SD.pdf)
+[回路図Rev1.1](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/Rev1.1/FM-7_SD_11.pdf)
 
-![FM-7_SD](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/FM-7_SD_1.jpg)
+![FM-7_SD_11](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/Rev1.1/FM-7_SD_11.jpg)
+
+### FM-7_SD Rev2.0基板
+　KiCadフォルダ内Rev2.0フォルダのFM-7_SD_20.pdfを参照してください。
+
+[回路図Rev2.0](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/Rev2.0/FM-7_SD_20.pdf)
+
+![FM-7_SD_20](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/Rev2.0/FM-7_SD_20.jpg)
+
+### FM-7_SD Rev3.0基板
+　KiCadフォルダ内Rev3.0フォルダのFM-7_SD_30.pdfを参照してください。
+
+[回路図Rev3.0](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/Rev3.0/FM-7_SD_30.pdf)
+
+![FM-7_SD_30](https://github.com/yanataka60/FM-7_SD/blob/main/KiCad/Rev3.0/FM-7_SD_30.jpg)
 
 ## 部品
+### FM-7_SD Rev1.1基板
 |番号|品名|数量|備考|
 | ------------ | ------------ | ------------ | ------------ |
 |J1|2x25Pinコネクタ|1|秋月電子通商 PH-2x40RGなど|
 ||J4、J5のいずれか(注1)|||
 |J4|Micro_SD_Card_Kit|1|秋月電子通商 AE-microSD-LLCNV (注2)|
-|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注4)|
+|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注5)|
 |U1|74LS04|1||
 |U2|74LS30|1||
 |U3|8255|1||
@@ -52,6 +88,45 @@
 |U5|74LS00|1||
 |C1 C3 C4 C6|積層セラミックコンデンサ 0.1uF|4||
 |C2|電解コンデンサ 16v100uF|1||
+||本体内BOOT-ROMを差し替える場合|||
+||ROM 2716又は2732|1|AT28C16、M2732Aなど|
+||2732変換基板又は24PinICソケット|1|2732を使った場合の切り替え用|
+||3Pトグルスイッチ|1|2732を使った場合の切り替え用|
+
+### FM-7_SD Rev2.0基板
+|番号|品名|数量|備考|
+| ------------ | ------------ | ------------ | ------------ |
+|J1|FCN-365P032-AU又はOMRON XC5A-3282-1|1|(注4)|
+||J4、J5のいずれか(注1)|||
+|J4|Micro_SD_Card_Kit|1|秋月電子通商 AE-microSD-LLCNV (注2)|
+|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注5)|
+|U1|74LS04|1||
+|U2|74LS30|1||
+|U3|8255|1||
+|U4|Arduino_Pro_Mini_5V|1|(注3)|
+|U5|74LS00|1||
+|C1 C3 C4 C6|積層セラミックコンデンサ 0.1uF|4||
+|C2|電解コンデンサ 16v100uF|1||
+||本体内BOOT-ROMを差し替える場合|||
+||ROM 2716又は2732|1|AT28C16、M2732Aなど|
+||2732変換基板又は24PinICソケット|1|2732を使った場合の切り替え用|
+||3Pトグルスイッチ|1|2732を使った場合の切り替え用|
+
+### FM-7_SD Rev3.0基板
+|番号|品名|数量|備考|
+| ------------ | ------------ | ------------ | ------------ |
+|J1|2x25Pinコネクタ|1|秋月電子通商 PH-2x40RGなど|
+||J4、J5のいずれか(注1)|||
+|J4|Micro_SD_Card_Kit|1|秋月電子通商 AE-microSD-LLCNV (注2)|
+|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注5)|
+|U1 U7|74LS04|2||
+|U2 U6|74LS30|2||
+|U3|8255|1||
+|U4|Arduino_Pro_Mini_5V|1|(注3)|
+|U5|74LS00|1||
+|C1 C3 C4 C5 C6 C7|積層セラミックコンデンサ 0.1uF|6||
+|C2|電解コンデンサ 16v100uF|1||
+||本体内BOOT-ROMを差し替える場合|||
 ||ROM 2716又は2732|1|AT28C16、M2732Aなど|
 ||2732変換基板又は24PinICソケット|1|2732を使った場合の切り替え用|
 ||3Pトグルスイッチ|1|2732を使った場合の切り替え用|
@@ -62,7 +137,13 @@
 
 　　　注3)Arduino Pro MiniはA4、A5ピンも使っています。
 
-　　　注4)MicroSD Card Adapterを使う場合
+　　　注4)FCN-365P032-AUは入手困難、OMRON XC5A-3282-1は加工が必要
+
+　　　　　OMRON XC5A-3282-1は、ハウジング内の凸型に出っ張ている部分を台形に近付けるように削ってください。
+
+![OMRON XC5A32821](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/OMRON%20XC5A32821.JPG)
+
+　　　注5)MicroSD Card Adapterを使う場合
 
 　　　　　J5に取り付けます。
 
@@ -77,37 +158,53 @@
 ![MicroSD Card Adapter3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/MicroSD%20Card%20Adapter3.JPG)
 
 ## BOOT-ROMの差し替え
-　FM-7_SDを使うにはBOOT-ROMの差し替えが必須になります。
+　FM-8、FM-7、FM-NEW7でBOOT-ROMの差し替えを選択した場合には、programフォルダ内bootromフォルダにある「FM-7_BOOTROM_SD.bin」を使いますが、Disk-Basicを使うか、使わないかでROMの差し替え方法が変わります。
 
-　programフォルダ内bootromフォルダにある「FM-7_BOOTROM_SD.bin」を使いますが、次の２つの運用方法によりROMの差し替え方法が変わります。
+　FM-8は「FM-7_BOOTROM_SD.bin」をbootrom_FM8フォルダにある「FM-8_BOOTROM_SD.bin」に読み替えてください。
 
 #### 2023.2.17修正 DOS-MODEからの起動は出来ませんでした。運用方法は２通りとなります。
 
-　1　FM-7_SDとCMTだけが使えればよい。(DISK-BASIC、DOS-MODEは使わない)
+　1)FM-7_SDとCMTだけが使えればよい。(DISK-BASIC、DOS-MODEは使わない)
 
 　　　元のBOOT-ROMを読み出す必要はありません。FM-7_BOOTROM_SD.binをROMライター(TL866II Plus等)を使ってROM 2716のアドレス$0000～$01FFに書き込んでBOOT-ROMのICソケットに装着します。
 
-　2　FM-7_SDとCMTに加えてDISK-BASICは使いたい又は、FM-7_SD、CMT、DISK-BASIC、DOS-MODEのすべてを使いたい。
+　2)FM-7_SDとCMTに加えてDISK-BASICは使いたい又は、FM-7_SD、CMT、DISK-BASIC、DOS-MODEのすべてを使いたい。
 
 　　　ROM 2732の前半に元のBOOT-ROMの内容、後半の$0800～$09FFにFM-7_BOOTROM_SD.binとしたバイナリをROMライター(TL866II Plus等)を使って書き込みます。2732変換基板又は24PinICソケットの21Pinを曲げてスイッチで5VとGNDを切り替えられるようにしてBOOT-ROMのICソケットに装着します。
 
-### FM-7 BOOT-ROM
+### FM-7 BOOT-ROMの場所
 ![boot-rom1](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/FM-7_BOOT-ROM_1.JPG)
 
 ![boot-rom2](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/FM-7_BOOT-ROM_2.JPG)
 
-### FM-NEW7 BOOT-ROM
+### FM-NEW7 BOOT-ROMの場所
 ![boot-rom3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/NEW-7_BOOT-ROM_1.JPG)
 
 ![boot-rom4](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/NEW-7_BOOT-ROM_2.JPG)
 
+### FM-8 BOOT-ROMの場所
+電源ユニットの下です。
+![boot-rom5](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/FM8_BOOT-ROM_1.JPG)
+
+![boot-rom6](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/FM8_BOOT-ROM_2.JPG)
+
 ## SD-CARDアクセス初期設定プログラム
+### BOOT-ROMを差し替えた場合
 　programフォルダ内boot_iplフォルダの「@BOOT_IPL_FM-7.bin」をSD-CARDにコピーしてください。
+
+　FM-8の場合は、boot_ipl_FM8フォルダ内の「@BOOT_IPL_FM-8.bin」をSD-CARDにコピーします。なお、「@BOOT_IPL_FM-7.bin」と「@BOOT_IPL_FM-8.bin」の両方がSD-CARDにコピーしてあっても大丈夫です。
 
 　FM-7起動後に「EXEC &HFE02」を実行することでSD-CARDから「@BOOT_IPL_FM-7.bin」がテキストエリアの最初に読み込まれSD-CARDが使えるようBASICコマンドの追加、BIOSへのパッチあて、テキストエリアの再設定が行われます。
 
+### BOOT-ROMを差し替えない場合
+#### FDから起動
+　DISKBASICフォルダのSDINIT_FM7.D77ディスクイメージをFDに書き込むか、SDINIT_FM7.binをFDに書き込んでください。
+
+#### CMTから起動
+　CMTLOADフォルダのSDINIT_FM7.wav(FM8は、SDINIT_FM8.wav)をCMTからロードして実行します。
+
 ## Arduinoプログラム
-　Arduino IDEを使ってArduinoフォルダのFM-7_SDフォルダ内FM-7_SD.inoを書き込みます。
+　Arduino IDEを使ってArduinoフォルダのFM-7_SDフォルダ内FM-7_SD.inoを書き込みます。FM-8も共通のプログラムを使用しています。
 
 　SdFatライブラリを使用しているのでArduino IDEメニューのライブラリの管理からライブラリマネージャを立ち上げて「SdFat」をインストールしてください。
 
@@ -118,7 +215,7 @@
 #### 電源が入ったFM-7本体とFM-7_SDを繋げたままArduinoを書き込む場合には、Arduinoに繋ぐシリアルコンバータから絶対に電源を供給しないでください。最悪FM-7本体が破壊される場合があります。
 
 ## 接続
-　FM-7本体後ろの50Pin拡張端子から50Pinフラットケーブルで接続します。
+　Rev1.1、Rev3.0をFM-8、FM-7、FM-NEW7で使う場合には本体後ろの50Pin拡張端子から50Pinフラットケーブルで接続します。
 
 ![connect1](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/CONNECT_1.JPG)
 
@@ -134,6 +231,12 @@
 
 #### 悪い例です
 ![Cable3](https://github.com/yanataka60/FM-7_SD/blob/main/jpeg/Cable2.JPG)
+
+　Rev1.1をFM-77以降、Rev3.0をFM-77で使う場合にはアンフェノール フルピッチへ変換するケーブルの自作が必要です。
+
+　接続ピンは、はせりんさんのサイトが参考になります。
+
+　http://haserin09.la.coocan.jp/difference.html
 
 ## SD-CARD
 　FAT16又はFAT32が認識できます。
@@ -162,53 +265,25 @@
 　「BET2T77.exe」を起動し、開いたウィンドウにbimファイルをドロップすればT77ファイルが作成されます。
 
 ## 起動手順
-　1　FM-7_SDを50Pinフラットケーブルでつなぎます。
+### ROM-BASIC
+　1　電源を入れます。
 
-　2　BOOT-ROMの差し替え方に合わせて本体後部のディップスイッチを切り替えます。
+　2　この時点ではCMTが使えるROM-BASICが起動しています。
 
-　3　電源を入れます。
+　3　「EXEC &HFE02」を実行します。
 
-　4　この時点ではCMTが使えるROM-BASICが起動しています。
+　4　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。BASICのフリーエリアは947Byte程減少します。
 
-　5　「EXEC &HFE02」を実行します。
+### DISK-BASIC
+　1　電源を入れ、DISK-BASICを起動します。
 
-　6　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。BASICのフリーエリアは947Byte程減少します。
-
-## 起動手順(DISK-BASIC)
-　FM-7_SDとFDDを両方同時に接続できる環境にあればFDからFM-7_SD初期設定プログラムを走らせることでBOOT-ROMの差し替えを行わずにSD-CARDからLOAD、SAVE出来るようになります。
-
-　1　DISKBASICフォルダのSDINIT_FM7.D77ディスクイメージをFDに書き込むか、SDINIT_FM7.binをFDに書き込んでください。
-
-　2　電源を入れ、DISK-BASICを起動します。
-
-　3　作成したFDの中にある「SDINIT」をロードし、実行します。
+　2　作成したFDの中にある「SDINIT」をロードし、実行します。
 
 　　　LOADM"SDINIT"してからEXEC &H6000又はLOADM"SDINIT",,R
 
-　4　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。
+　3　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。
 
-　5　LOADM"SDINIT",,RをSTARTUPとして保存し、AUTOUTYで自動実行を設定すれば手間が省けます。
-
-## 起動手順(BOOT-ROMを差し替えずにCMTから毎回SDINIT_FM7をロードする)
-　電源投入時及びRESET時に毎回CMTからSDINIT_FM7をロード、実行する気があればBOOT-ROMの差し替えを行わずにSD-CARDからLOAD、SAVE出来るようになります。
-
-　1　LOADM"SDINIT",,Rと入力、実行して次に掲げる方法などで再生したCMTLOADフォルダのSDINIT_FM7.WAVをCMTケーブルで接続して読み込みます。(ロード時間約15秒)
-
-　　1)WindowsマシンでSDINIT_FM7.WAVを再生する。
-
-　　2)SDINIT_FM7.WAVをカセットに保存してカセットテープレコーダーで再生する。
-
-　　3)携帯音楽プレーヤーでSDINIT_FM7.WAVを再生する。
-
-　2　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。
-
-#### メリット
-　BOOT-ROMの差し替えが必要ない。
-
-#### デメリット
-　起動時のROM-BASICフリーエリアから1136Byte程減少。
-
-　電源投入時及びRESET時に毎回CMTから読み込み実行が必要となる。
+　4　LOADM"SDINIT",,RをSTARTUPとして保存し、AUTOUTYで自動実行を設定すれば手間が省けます。
 
 ## 使い方
 　BASICから以下のコマンドが使えます。
@@ -319,6 +394,10 @@ F-BASICのSAVEMコマンドと同じ使い方です。
 
 　Apollo様
 
+　はせりんさんのサイトにあるインタフェース仕様表が大変参考になりました。ありがとうございます。
+
+　　http://haserin09.la.coocan.jp/difference.html
+
 ## 追記
 2023.2.11 @BOOT_IPL_FM-7.binをリロケータブルに修正
 
@@ -332,4 +411,4 @@ F-BASICのSAVEMコマンドと同じ使い方です。
 
 2023.2.18 50Pinフラットケーブルの嵌め方を追記しました。
 
-2023.2.19 FD用FM-7_SD初期設定プログラムのバグを修正。
+2023.2.21 機種、コネクタの違いから基板3種(Rev1.1、Rev2.0、Rev3.0)を用意したため、Documentを全面修正しました。
