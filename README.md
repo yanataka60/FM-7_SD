@@ -194,7 +194,7 @@
 
 　FM-8の場合は、boot_ipl_FM8フォルダ内の「@BOOT_IPL_FM-8.bin」をSD-CARDにコピーします。なお、「@BOOT_IPL_FM-7.bin」と「@BOOT_IPL_FM-8.bin」の両方がSD-CARDにコピーしてあっても大丈夫です。
 
-　FM-7起動後に「EXEC &HFE02」を実行することでSD-CARDから「@BOOT_IPL_FM-7.bin」がテキストエリアの最初に読み込まれSD-CARDが使えるようBASICコマンドの追加、BIOSへのパッチあて、テキストエリアの再設定が行われます。
+　FM-7起動後に「EXEC &HFE02」(又は「EXEC -510」)を実行することでSD-CARDから「@BOOT_IPL_FM-7.bin」がテキストエリアの最初に読み込まれSD-CARDが使えるようBASICコマンドの追加、BIOSへのパッチあて、テキストエリアの再設定が行われます。
 
 ### BOOT-ROMを差し替えない場合
 #### FDから起動
@@ -270,7 +270,7 @@
 
 　2　この時点ではCMTが使えるROM-BASICが起動しています。
 
-　3　「EXEC &HFE02」を実行します。
+　3　「EXEC &HFE02」(又は「EXEC -510」)を実行します。
 
 　4　「FM-7_SD READY OK!」と表示されたらSD-CARDにアクセスできます。BASICのフリーエリアは947Byte程減少します。
 
