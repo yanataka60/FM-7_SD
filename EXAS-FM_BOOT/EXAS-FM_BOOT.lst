@@ -1,0 +1,115 @@
+00001      FDF0         PIOA     EQU     $FDF0
+00002      FDF1         PIOB     EQU     $FDF1
+00003      FDF2         PIOC     EQU     $FDF2
+00004      FDF3         PIOR     EQU     $FDF3
+00005 0000                       
+00006 7000                       ORG     $7000
+00007 7000                       
+00008                   *
+00009 7000              START    
+00010 7000 3430                  PSHS    X,Y           ;一応X,Yを保存
+00011 7002 B6FFE5                LDA     $FFE5         ;$FFE5が$00以外ならFDが接続されているのでST1へ
+00012 7005 8100                  CMPA    #$00
+00013 7007 2610                  BNE     ST1
+00014 7009 8EFFE8                LDX     #$FFE8        ;SDモードで起動されているなら$FFE8からにEXAS-FM起動コードをコピー
+00015 700C 318D0080              LEAY    DATA,PCR      ;EXAS-FM起動コード
+00016 7010 C606                  LDB     #$06
+00017 7012 A6A0         DA1      LDA     ,Y+
+00018 7014 A780                  STA     ,X+
+00019 7016 5A                    DECB
+00020 7017 26F9                  BNE     DA1
+00021 7019                       
+00022 7019 8D23         ST1      BSR     READ1BYTE     ;SDから1Byte読み込み
+00023 701B 8116                  CMPA    #$16          ;EXAS-FMコンパイラ本体最初の$16を読むまで読み飛ばし
+00024 701D 26FA                  BNE     ST1
+00025 701F B7FD0F                STA     $FD0F         ;$8000～裏RAMに切り替え
+00026 7022 8E9000                LDX     #$9000        ;書き込みSTART位置
+00027 7025 A184                  CMPA    ,X            ;既に書き込みがあれば読み出しをスキップして$9000へジャンプ
+00028 7027 2710                  BEQ     ST2
+00029 7029 108E5FFA              LDY     #$5FFA        ;読み込むバイト数
+00030 702D A780                  STA     ,X+           ;裏RAMへ書き込んでX+1
+00031 702F 313F                  LEAY    -1,Y          ;読み込むバイト数-1
+00032 7031                       
+00033 7031 8D0B         LP1      BSR     READ1BYTE     ;SDから1Byte読み込み
+00034 7033 A780                  STA     ,X+           ;裏RAMへ書き込んでX+1
+00035 7035 313F                  LEAY    -1,Y          ;読み込むバイト数-1
+00036 7037 26F8                  BNE     LP1           ;読み込むバイト数がゼロになるまでループ
+00037 7039 3530         ST2      PULS    X,Y           ;終わったらX,Yを戻す。
+00038 703B 7E9000                JMP     $9000         ;裏RAM$9000へジャンプ
+00039 703E                       
+00040 703E              READ1BYTE
+00041 703E 8656                  LDA     #$56
+00042 7040 8D2B                  BSR     SNDBYTE       ;Aレジスタのコマンドコードを送信
+00043 7042 8D13                  BSR     RCVBYTE       ;状態取得(00H=OK)
+00044 7044 8D11                  BSR     RCVBYTE
+00045 7046 39                    RTS
+00046 7047                       
+00047                   **** BUSYをCHECK(1) ****
+00048                   ;PORTC BIT7が1になるまでLOOP
+00049 7047 B6FDF2       F1CHK    LDA     PIOC
+00050 704A 8480                  ANDA    #$80          ;PORTC BIT7 = 1?
+00051 704C 27F9                  BEQ     F1CHK
+00052 704E 39                    RTS
+00053 704F                       
+00054                   **** BUSYをCHECK(0) ****
+00055                   ;PORTC BIT7が0になるまでLOOP
+00056 704F B6FDF2       F2CHK    LDA     PIOC
+00057 7052 8480                  ANDA    #$80          ;PORTC BIT7 = 0?
+00058 7054 26F9                  BNE     F2CHK
+00059 7056 39                    RTS
+00060 7057                       
+00061                   **** 1BYTE受信****
+00062                   *受信データをアキュムレータAにセットしてリターン
+00063 7057 8DEE         RCVBYTE  BSR     F1CHK         ;PORTC BIT7が1になるまでLOOP
+00064 7059 B6FDF1                LDA     PIOB          ;PORTB -> A
+00065 705C 3402                  PSHS    A
+00066 705E 8605                  LDA     #$05
+00067 7060 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 1
+00068 7063 8DEA                  BSR     F2CHK         ;PORTC BIT7が0になるまでLOOP
+00069 7065 8604                  LDA     #$04
+00070 7067 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 0
+00071 706A 3502                  PULS    A
+00072 706C 39                    RTS
+00073 706D                       
+00074                   **** 1BYTE送信 ****
+00075                   *アキュムレータAの内容をPORTA下位4BITに4BITずつ送信
+00076 706D              SNDBYTE
+00077 706D 3402                  PSHS    A
+00078 706F 44                    LSRA
+00079 7070 44                    LSRA
+00080 7071 44                    LSRA
+00081 7072 44                    LSRA
+00082 7073 840F                  ANDA    #$0F
+00083 7075 8D07                  BSR     SND4BIT
+00084 7077 3502                  PULS    A
+00085 7079 840F                  ANDA    #$0F
+00086 707B 8D01                  BSR     SND4BIT
+00087 707D 39                    RTS
+00088 707E                       
+00089                   **** 4BIT送信 ****
+00090                   *アキュムレータA下位4ビットを送信する
+00091 707E              SND4BIT
+00092 707E B7FDF0                STA     PIOA
+00093 7081 8605                  LDA     #$05
+00094 7083 B7FDF3                STA     PIOR          ;PORTC BIT2 <- 1
+00095 7086 8DBF                  BSR     F1CHK         ;PORTC BIT7が1になるまでLOOP
+00096 7088 8604                  LDA     #$04
+00097 708A B7FDF3                STA     PIOR          ;PORTC BIT2 <- 0
+00098 708D 8DC0                  BSR     F2CHK
+00099 708F 39                    RTS
+00100 7090                       
+00101                   ****** EXAS-FM起動コード *********
+00102 7090 B7FD0F       DATA     STA     $FD0F         ;裏RAM切替
+00103 7093 7E9000                JMP     $9000         ;EXAS-FM起動
+00104 7096                       
+00105 7096                       END
+
+SYMBOL TABLE
+
+FDF0 PIOA       FDF1 PIOB       FDF2 PIOC       FDF3 PIOR       7000 START   
+7012 DA1        7019 ST1        7031 LP1        7039 ST2        703E READ1BYT
+7047 F1CHK      704F F2CHK      7057 RCVBYTE    706D SNDBYTE    707E SND4BIT 
+7090 DATA       
+
+Total symbol=16
+Total errors=0
