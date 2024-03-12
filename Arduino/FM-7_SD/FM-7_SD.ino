@@ -1,3 +1,4 @@
+//2024. 3.12 sd-card再挿入時の初期化処理を追加
 //
 #include "SdFat.h"
 #include <SPI.h>
@@ -29,6 +30,19 @@ unsigned int w_len1,w_len2;
 #define PA3PIN          (19)
 // ファイル名は、ロングファイルネーム形式対応
 boolean eflg;
+
+void sdinit(void){
+  // SD初期化
+  if( !SD.begin(CABLESELECTPIN,8) )
+  {
+////    Serial.println("Failed : SD.begin");
+    eflg = true;
+  } else {
+////    Serial.println("OK : SD.begin");
+    eflg = false;
+  }
+////    Serial.println("START");
+}
 
 void setup(){
 ////    Serial.begin(9600);
@@ -65,16 +79,7 @@ void setup(){
 //  delay(1000);
 //SETSコマンドでSAVE用ファイル名を指定なくSAVEされた場合のデフォルトファイル名を設定
   strcpy(w_name,"default.bim");
-  // SD初期化
-  if( !SD.begin(CABLESELECTPIN,8) )
-  {
-////    Serial.println("Failed : SD.begin");
-    eflg = true;
-  } else {
-////    Serial.println("OK : SD.begin");
-    eflg = false;
-  }
-////    Serial.println("START");
+  sdinit();
 }
 
 //4BIT受信
@@ -410,11 +415,13 @@ void loadopen(void){
       flg = true;
     } else {
       snd1byte(0xf2);
+      sdinit();
 ////  Serial.println("file_r open error");
       flg = false;
     }
   }else{
     snd1byte(0xf1);
+    sdinit();
 ////  Serial.println("file_r open error");
     flg = false;
   }
@@ -473,6 +480,7 @@ void loop()
 //状態コード送信(OK)
         snd1byte(0x00);
         if (rcv1byte()==0x00){
+          sdinit();
           dirlist();
         }
         break;
@@ -535,5 +543,6 @@ void loop()
   } else {
 //状態コード送信(ERROR)
     snd1byte(0xF0);
+    sdinit();
   }
 }
