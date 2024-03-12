@@ -389,11 +389,18 @@ F-BASICのSAVEMコマンドと同じ使い方です。
 　　SDIR "P"[CR]
 
 ### 操作上の注意
-　「SD-CARD INITIALIZE ERROR」と表示されたときは、SD-CARDが挿入されているか確認し、FM-7本体をリセットしてください。Arduinoのみのリセットでは復旧しません。
+　~~「SD-CARD INITIALIZE ERROR」と表示されたときは、SD-CARDをいったん抜き再挿入したうえでArduinoをリセットしてください。~~
 
-　SD-CARDにアクセスしていない時に電源が入ったままで SD-CARDを抜いた後、再挿入しSD-CARDにアクセスすると「SD-CARD INITIALIZE ERROR」となる場合があります。再挿入した場合にはSD-CARDにアクセスする前にArduinoを必ずリセットしてください。
+　~~SD-CARDにアクセスしていない時に電源が入ったままで SD-CARDを抜いた後、再挿入しSD-CARDにアクセスすると「SD-CARD INITIALIZE ERROR」となる場合があります。再挿入した場合にはSD-CARDにアクセスする前にArduinoを必ずリセットしてください。~~
 
-　SD-CARDの抜き差しは電源を切った状態で行うほうがより確実です。
+　~~SD-CARDの抜き差しは電源を切った状態で行うほうがより確実です。~~
+
+　(2024.3.10) SD-CARDにアクセスしていない時に電源が入ったままでSD-CARDを抜くと再度SD-CARDを挿入してもSD-CARDにアクセスできない問題を解消しました。(Arduinoを最新版に書き換えてください)
+
+　再度SD-CARDを挿入した後、SDIR、SETL、SETS等でSD-CARDに3回ほどアクセスすれば復旧します。
+
+　LOAD、LOADM、SAVE、SAVEMでは復旧しません。
+
 
 ## EXAS-FMコンパイラ起動プログラム
 　月刊I/O '84/4月号に掲載されたEXAS-FMコンパイラをFM-7_SDから起動できるようにする起動プログラムです。
@@ -459,3 +466,5 @@ F-BASICのSAVEMコマンドと同じ使い方です。
 2023.4.12 EXAS-FMコンパイラ起動用プログラムを追加しました。
 
 2024.1.15 SDカードは8GB以下が望ましいことを追記。
+
+2024.3.10 電源が入ったままでSD-CARDを抜くと再度SD-CARDを挿入してもSD-CARDにアクセスできない問題を解消した。
