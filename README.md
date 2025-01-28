@@ -77,10 +77,10 @@
 ### FM-7_SD Rev1.1基板
 |番号|品名|数量|備考|
 | ------------ | ------------ | ------------ | ------------ |
-|J1|2x25ボックスヘッダ|1|共立エレショップ JS-1200R-50など、秋月電子通商 PH-2x40RGなどのピンヘッダでも代用可(注6)|
+|J1|2x25ボックスヘッダ|1|共立エレショップ JS-1200R-50など、秋月電子通商 PH-2x40RGなどのピンヘッダでも代用可(注5)|
 ||J4、J5のいずれか(注1)|||
 |J4|Micro_SD_Card_Kit|1|秋月電子通商 AE-microSD-LLCNV (注2)|
-|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注5)|
+|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注6)|
 |U1|74LS04|1||
 |U2|74LS30|1||
 |U3|8255|1||
@@ -101,7 +101,7 @@
 |J1|FCN-365P032-AU又はOMRON XC5A-3282-1|1|(注4)|
 ||J4、J5のいずれか(注1)|||
 |J4|Micro_SD_Card_Kit|1|秋月電子通商 AE-microSD-LLCNV (注2)|
-|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注5)|
+|J5|MicroSD Card Adapter|1|Arduino等に使われる5V電源に対応したもの (注6)|
 |U1|74LS04|1||
 |U2|74LS30|1||
 |U3|8255|1||
