@@ -276,14 +276,14 @@
 
 #### 2026.9.10) T77DECを使わずにBIMファイルが作成できるよう「T77toBIM」を作成しました。
 
-T77toBIMフォルダ中のT77toBIM.exeを実行します。
+　T77toBIMフォルダ中のT77toBIM.exeを実行します。
 
 　変換例)T77toBIM TEST.T77 TEST.BIM[CR]
 
 　を実行するとTEST.BIMというファイルが出来上がります。
 
 
-　bimファイルをT77に戻すにはBET2T77フォルダ内の「BET2T77.exe」を使います。
+#### bimファイルをT77に戻すにはBET2T77フォルダ内の「BET2T77.exe」を使います。
 
 　「BET2T77.exe」を起動し、開いたウィンドウにbimファイルをドロップすればT77ファイルが作成されます。
 
